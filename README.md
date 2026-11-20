@@ -1,4 +1,4 @@
-# KDE Anomaly Detection Course Project
+# KDE异常检测课程项目
 
 四人机器学习课程项目，研究核密度估计（KDE）带宽对异常检测的影响，并与局部异常因子（LOF）作受控比较。
 
@@ -18,6 +18,6 @@
 - `results/`：机器可读结果和图表
 - `submission/`：课程要求的最终交付文件
 
-## 公开仓库说明
+## GitHub仓库
 
-此目录已连接至 GitHub 公开仓库 [kekan1120/kde-anomaly-detection-course-project](https://github.com/kekan1120/kde-anomaly-detection-course-project)，默认分支为 `main`。
+本地项目已连接至 [kekan1120/kde-anomaly-detection-course-project](https://github.com/kekan1120/kde-anomaly-detection-course-project)，仓库为公开可见，默认分支为 `main`。
