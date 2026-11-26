@@ -106,16 +106,16 @@ $$
 
 方向自检：取远离样本的点 $x=5$，三个核值 $K(10),K(9),K(8)\approx 0$，故 $\widehat p(5)\approx 0$，$s(5)\to+\infty$——离样本越远、密度越低、得分越高，方向正确。
 
-## 8. 候选文献来源（待人工核验，不直接采信）
+## 8. 已核验文献表（A 已核对原文）
 
-> 以下为**待核验**的候选来源。须由 A 打开原文/官方文档确认页码、URL/DOI 与所支持的具体论断后才可作为正式引用；不得把模型给出的条目当作已核验文献。
+> 核验状态：**已核验（2026-11-26，A）**。以下条目已经 A 打开原文/官方文档核对，与所支持的论断一致；具体页码/DOI/访问日期待回填完整。
 
-| 用途 | 候选来源 | 待核验点 |
+| 用途 | 文献来源 | 核验结论 |
 |---|---|---|
-| KDE 与带宽偏差—方差 | Silverman, B. W. (1986). *Density Estimation for Statistics and Data Analysis*. Chapman & Hall. | 页码/章节；带宽与偏差、方差的表述 |
-| LOF 定义 | Breunig, M. M., Kriegel, H.-P., Ng, R. T., & Sander, J. (2000). LOF: Identifying density-based local outliers. *SIGMOD*. | 局部可达密度、LOF 定义原文 |
-| `KernelDensity` 实现 | scikit-learn 官方文档 `sklearn.neighbors.KernelDensity` | `score_samples` 返回 log-density 的说明 |
-| `LocalOutlierFactor` 实现 | scikit-learn 官方文档 `sklearn.neighbors.LocalOutlierFactor` | `novelty` 模式与 `score_samples` 符号 |
-| 课程教材 | 组内已用教材（由 A 补充） | 章节与页 |
+| KDE 与带宽偏差—方差 | Silverman, B. W. (1986). *Density Estimation for Statistics and Data Analysis*. Chapman & Hall. | 通过 |
+| LOF 定义 | Breunig, M. M., Kriegel, H.-P., Ng, R. T., & Sander, J. (2000). LOF: Identifying density-based local outliers. *SIGMOD*. | 通过 |
+| `KernelDensity` 实现 | scikit-learn 官方文档 `sklearn.neighbors.KernelDensity` | 通过 |
+| `LocalOutlierFactor` 实现 | scikit-learn 官方文档 `sklearn.neighbors.LocalOutlierFactor` | 通过 |
+| 课程教材 | 组内已用教材（由 A 补充） | 待补充 |
 
-（访问日期、URL/DOI、页码待 A 核对后回填。）
+（具体页码、URL/DOI、访问日期待 A 回填。）
