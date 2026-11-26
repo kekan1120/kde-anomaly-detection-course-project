@@ -36,3 +36,19 @@
 - [x] GitHub远程公开仓库已创建并连接。
 
 阶段0退出后，再进入阶段1“理论、数据与实验协议”的验收。
+
+## 阶段2实现与复现（成员 C）进度
+
+| 项目 | 状态 | 证据 |
+|---|---|---|
+| 独立实现（数据生成 / 打分 / 阈值 / 指标 / 峰结构 / 实验 / 落盘） | 完成 | `04_code/src/kdelof/` |
+| 复现 B 的基准数值 | 完成 | 三个划分 sha256 **逐位一致**；50 项对账**偏差 0** |
+| 正确性核验（15 项） | 15 PASS / 0 FAIL | `05_results/main/sanity_checks.md` |
+| 结果审计（13 项） | 13 PASS / 0 FAIL | `05_results/main/audit_results.md` |
+| 用 B 的审计脚本审 C 的结果（12 项） | 12 PASS / 0 FAIL | `05_results/main/audit_by_B_suite.md` |
+| 与 B 基准逐项对账（50 项） | 50 PASS / 0 FAIL | `05_results/main/reconciliation_vs_B.md` |
+| 干净环境重跑（新建 venv + 独立输出目录） | 一致 | 指纹 sha256 一致，指标最大偏差 0.0 |
+| 交叉审查 B 的参考实现 | 发现并修正 1 处缺陷 | `04_code/ref_check/PATCHES_C.md` |
+| 个人 AI 过程记录 | 已建立 | `process-logs/member_C.md` |
+| 待办：`anomaly.near`（空区紧凑簇）是否启用 | **待 A/D 拍板** | 只需一行配置；**必须在看结果前决定** |
+| 待办：本机会话分享链接 | 待本人填写 | `process-logs/member_C.md` 表头 |

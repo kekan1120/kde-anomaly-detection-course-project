@@ -1,0 +1,11 @@
+﻿data_stream,split,role,n,seed_core_repeat0,generator,sampling_formula,extension_repeat_ids,extension_seed_formula,consumes_randomness,notes
+train.dense,train,正常·密集簇,300,1701,numpy.random.Generator(numpy.random.PCG64(seed)),"X = mean_dense + 0.5*standard_normal((n,2))",1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+train.sparse,train,正常·稀疏簇,300,1711,numpy.random.Generator(numpy.random.PCG64(seed)),"X = mean_sparse + 1.0*standard_normal((n,2))",1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+validation.dense,validation,正常·密集簇,500,1702,numpy.random.Generator(numpy.random.PCG64(seed)),"X = mean_dense + 0.5*standard_normal((n,2))",1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+validation.sparse,validation,正常·稀疏簇,500,1712,numpy.random.Generator(numpy.random.PCG64(seed)),"X = mean_sparse + 1.0*standard_normal((n,2))",1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+test.dense,test,正常·密集簇,500,1703,numpy.random.Generator(numpy.random.PCG64(seed)),"X = mean_dense + 0.5*standard_normal((n,2))",1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+test.sparse,test,正常·稀疏簇,500,1713,numpy.random.Generator(numpy.random.PCG64(seed)),"X = mean_sparse + 1.0*standard_normal((n,2))",1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+test.anomaly.far,test,异常·远端圆环,250,1723,numpy.random.Generator(numpy.random.PCG64(seed)),"theta=uniform(0,2pi,n); r=uniform(5,7,n); X=[r*cos,r*sin]",1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+test.anomaly.near,test,异常·空区紧凑簇（默认关闭）,0,1733,numpy.random.Generator(numpy.random.PCG64(seed)),"X=[0,5]+0.35*standard_normal((n,2))",1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+demo1d.dense,demo_1d,一维示意·密集分量,120,1704,numpy.random.Generator(numpy.random.PCG64(seed)),x = -1.5 + 0.30*standard_normal(n),1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序
+demo1d.sparse,demo_1d,一维示意·稀疏分量,80,1714,numpy.random.Generator(numpy.random.PCG64(seed)),x = 1.5 + 0.80*standard_normal(n),1-10,seed_core + 10000 * repeat,yes,每个数据流独立 Generator，流之间不共享随机数消耗顺序

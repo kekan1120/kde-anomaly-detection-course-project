@@ -1,0 +1,113 @@
+{
+  "protocol_version": "B-v1.0-locked",
+  "written_by": "C 实现与复现负责人",
+  "note": "sha256 为 X 的 float64 原始字节摘要（同环境逐位判据）；跨环境比对用 stats，相对容差 1e-12",
+  "splits": {
+    "train": {
+      "split": "train",
+      "repeat": 0,
+      "n": 600,
+      "sha256_float64": "bbe5881fa6b3acc65340fea280fd28353b2cc9a3d6ff4ab19c97a8a457c5679f",
+      "summary": {
+        "split": "train",
+        "repeat": 0,
+        "n": 600,
+        "n_dense": 300,
+        "n_sparse": 300,
+        "n_anomaly": 0,
+        "n_anomaly_far": 0,
+        "n_anomaly_compact_void": 0,
+        "n_missing": 0
+      },
+      "stats": {
+        "mean": [
+          0.06545484003177426,
+          -0.03978977722112398
+        ],
+        "std_ddof1": [
+          2.202817121891955,
+          0.7946813903711657
+        ],
+        "min": [
+          -3.267412255080993,
+          -2.764347127523703
+        ],
+        "max": [
+          5.622356148118287,
+          3.9683417718477063
+        ]
+      }
+    },
+    "validation": {
+      "split": "validation",
+      "repeat": 0,
+      "n": 1000,
+      "sha256_float64": "ac03679b6fab71e2e58688cacb380bb7bd947ecb4261359692a0e11a8f8377b2",
+      "summary": {
+        "split": "validation",
+        "repeat": 0,
+        "n": 1000,
+        "n_dense": 500,
+        "n_sparse": 500,
+        "n_anomaly": 0,
+        "n_anomaly_far": 0,
+        "n_anomaly_compact_void": 0,
+        "n_missing": 0
+      },
+      "stats": {
+        "mean": [
+          0.05007023514835716,
+          -0.018811652255333006
+        ],
+        "std_ddof1": [
+          2.1793270302352377,
+          0.7944843560079732
+        ],
+        "min": [
+          -3.6178432473428788,
+          -3.044531333529987
+        ],
+        "max": [
+          4.94347551845841,
+          3.797875738797967
+        ]
+      }
+    },
+    "test": {
+      "split": "test",
+      "repeat": 0,
+      "n": 1250,
+      "sha256_float64": "e00edf67e4bb128d430cf14d430f274fce01125503ce7af07dcbf1ebc154f7df",
+      "summary": {
+        "split": "test",
+        "repeat": 0,
+        "n": 1250,
+        "n_dense": 500,
+        "n_sparse": 500,
+        "n_anomaly": 250,
+        "n_anomaly_far": 250,
+        "n_anomaly_compact_void": 0,
+        "n_missing": 0
+      },
+      "stats": {
+        "mean": [
+          0.019157067147694558,
+          0.12175057652345476
+        ],
+        "std_ddof1": [
+          2.7537744520456218,
+          1.9748541621214692
+        ],
+        "min": [
+          -6.9262317191151865,
+          -6.964181925988705
+        ],
+        "max": [
+          6.962909643447378,
+          6.961136241759518
+        ]
+      }
+    }
+  },
+  "demo_1d_n": 200
+}
