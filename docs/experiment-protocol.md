@@ -82,8 +82,8 @@
 
 ## 9. 复现与配置
 
-- 配置文件：`src/config.json` 保存全部种子、簇参数、异常比例、参数网格、阈值分位数。
-- 运行：`python src/run_experiment.py`，输出 `results/metrics.csv`、`results/figures/*.png`、`results/run_log.txt`。
+- 配置文件：`04_code/ai_draft/config.json` 保存全部种子、簇参数、异常比例、参数网格、阈值分位数。
+- 运行：`python 04_code/ai_draft/run_experiment.py`，输出 `05_results/ai_draft/metrics.csv`、`05_results/ai_draft/figures/*.png`、`05_results/ai_draft/run_log.txt`。
 - 依赖：numpy、pandas、scikit-learn、matplotlib；运行前记录版本号到 `run_log.txt`。
 
 ## 10. 修正记录（人机协作纠错证据）

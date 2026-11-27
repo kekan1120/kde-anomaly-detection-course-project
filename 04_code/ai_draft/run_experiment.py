@@ -9,8 +9,8 @@ v3 变更：
 - 三张图：参数-AUROC、分簇/分类得分分布、KDE vs LOF 得分对比
 
 依赖：numpy, pandas, scikit-learn, matplotlib
-运行：python run_experiment.py
-输出：results/metrics.csv、results/score_details.csv、results/figures/*.png、results/run_log.txt
+运行：python 04_code/ai_draft/run_experiment.py
+输出：05_results/ai_draft/metrics.csv、score_details.csv、figures/*.png、run_log.txt
 
 关键约定：
 - 异常分数统一「越大越异常」。
@@ -30,9 +30,9 @@ from sklearn.metrics import (roc_auc_score, average_precision_score,
                              precision_score, recall_score, f1_score,
                              confusion_matrix)
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-ROOT = os.path.dirname(HERE)
-RESULTS = os.path.join(ROOT, "results")
+HERE = os.path.dirname(os.path.abspath(__file__))          # 04_code/ai_draft
+ROOT = os.path.dirname(os.path.dirname(HERE))               # 项目根
+RESULTS = os.path.join(ROOT, "05_results", "ai_draft")
 FIGURES = os.path.join(RESULTS, "figures")
 os.makedirs(FIGURES, exist_ok=True)
 
