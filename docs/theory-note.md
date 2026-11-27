@@ -106,16 +106,17 @@ $$
 
 方向自检：取远离样本的点 $x=5$，三个核值 $K(10),K(9),K(8)\approx 0$，故 $\widehat p(5)\approx 0$，$s(5)\to+\infty$——离样本越远、密度越低、得分越高，方向正确。
 
-## 8. 已核验文献表（A 已核对原文）
+## 8. 已核验文献表（A 已核对原文，完整出版信息）
 
-> 核验状态：**已核验（2026-11-26，A）**。以下条目已经 A 打开原文/官方文档核对，与所支持的论断一致；具体页码/DOI/访问日期待回填完整。
+> 核验状态：**已核验（2026-11-26，A 核对；2026-11-27 回填 DOI/URL/页码/访问日期）**。
+> 出版信息经检索核对与原文一致；参考文献条目可直接由本表生成。
 
-| 用途 | 文献来源 | 核验结论 |
-|---|---|---|
-| KDE 与带宽偏差—方差 | Silverman, B. W. (1986). *Density Estimation for Statistics and Data Analysis*. Chapman & Hall. | 通过 |
-| LOF 定义 | Breunig, M. M., Kriegel, H.-P., Ng, R. T., & Sander, J. (2000). LOF: Identifying density-based local outliers. *SIGMOD*. | 通过 |
-| `KernelDensity` 实现 | scikit-learn 官方文档 `sklearn.neighbors.KernelDensity` | 通过 |
-| `LocalOutlierFactor` 实现 | scikit-learn 官方文档 `sklearn.neighbors.LocalOutlierFactor` | 通过 |
-| 课程教材 | 组内已用教材（由 A 补充） | 待补充 |
+| 用途 | 文献来源 | DOI / ISBN | 页码 | URL | 访问日期 | 核验 |
+|---|---|---|---|---|---|---|
+| KDE 与带宽偏差—方差 | Silverman, B. W. (1986). *Density Estimation for Statistics and Data Analysis*. London: Chapman and Hall. | ISBN **0-412-24620-1**（专著无 DOI） | ix+175 p. | — | — | 通过 |
+| LOF 定义 | Breunig, M. M., Kriegel, H.-P., Ng, R. T., & Sander, J. (2000). LOF: Identifying density-based local outliers. *Proc. ACM SIGMOD 2000*, 93–104. | **10.1145/342009.335388** | **93–104** | https://doi.org/10.1145/342009.335388 | 2026-11-27 | 通过 |
+| `KernelDensity` 实现 | scikit-learn 官方文档 `sklearn.neighbors.KernelDensity` | — | — | https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html | 2026-11-27 | 通过 |
+| `LocalOutlierFactor` 实现 | scikit-learn 官方文档 `sklearn.neighbors.LocalOutlierFactor` | — | — | https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html | 2026-11-27 | 通过 |
+| 课程教材（KDE/LOF 背景） | 李航. *机器学习方法*. 北京: 清华大学出版社, 2022. | ISBN **978-7-302-59730-8** | 全书（引用时按章节补页码） | — | — | 通过（A 指定） |
 
-（具体页码、URL/DOI、访问日期待 A 回填。）
+> 说明：Silverman (1986) 为专著、无 DOI，引用用 ISBN；Breunig et al. (2000) 的 DOI 与页码 93–104 已按 DBLP/ACM 记录核对。参考文献格式按 GB/T 7714 或课程要求统一。
