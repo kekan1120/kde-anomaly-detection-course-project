@@ -4,10 +4,9 @@ __pycache__/
 venv/
 .pytest_cache/
 .ipynb_checkpoints/
-results/*.tmp
-results/*.log
+05_results/ai_draft/*.tmp
+05_results/ai_draft/*.log
 
-# C 追加：交叉审计的临时暂存目录、冒烟输出
+# C 添加：交叉审计的临时缓存目录、冒烟输出
 05_results/main/_cross_audit_stage/
 05_results/smoke/
-results/main/_cross_audit_stage/

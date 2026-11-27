@@ -23,6 +23,13 @@
 `run_log.txt` 首两行固定为 `protocol=NOT LOCKED (awaiting B-v1.1)` 与 `status=ad-hoc`，
 结果文件命名 `metrics_ad_hoc.csv`，**不得作为论文主结果**，也不进本表。
 
+两点与 A 的提案需要对齐（见 `docs/protocol-change-B-v1.1.md`）：
+
+1. **该提案 §4 步骤 2 写「输出到 `05_results/main/`」——不可执行**。那会覆盖已冻结的 v1.0 结果，
+   毁掉 50 项对账与 tag 的可复现性。新版本必须用**新目录**（目录名由 B 定），本表再加一行。
+2. `05_results/ai_draft/` 是 **A 侧 AI 草稿实验**的结果，与 `05_results/main/` 物理隔离；
+   它**不是**正式结果，不进本表正式行，论文数值不得取自该目录。
+
 ## 2. v1.0 关键文件的 sha256（前 16 位）
 
 | 文件 | sha256 | 含义 |

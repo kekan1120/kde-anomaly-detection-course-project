@@ -10,10 +10,15 @@
   "applies_to": "04_code/config_ref.json",
   "base_version": "B-v1.0-locked",
   "base_sha256": "A9E7691BDF84906EBAD5BDBADF9E666DACE61B48C0C28C5213FEA9972482D20B",
-  "candidate_version_if_accepted": "B-v1.1-near",
+  "candidate_version_if_accepted": "B-v1.1-locked（A 的提案用名，见 docs/protocol-change-B-v1.1.md；最终由 B 定稿）",
   "proposed_by": "C（实现与复现负责人）",
   "decision_owner": "B（协议版本号与字段增删改）",
   "origin_of_request": "A 的 docs/decision-log.md #15（启用空区紧凑簇异常），A 决定启用，B 决定如何入版本",
+  "see_also": [
+    "docs/protocol-change-B-v1.1.md（A 起草的提案，字段口径与本补丁一致：near.enabled/near.n_test/far.n_test；另含 protocol_locked_utc）",
+    "04_code/patches/protocol_section12_row_draft.md（§12 行草稿）",
+    "04_code/patches/impact_checklist.md（一页影响清单）"
+  ],
   "status": "pending-signature",
   "date_proposed": "2026-11-27",
 
