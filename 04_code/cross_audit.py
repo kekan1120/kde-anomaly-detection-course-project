@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import argparse
 import shutil
 import sys
 from pathlib import Path
@@ -38,7 +39,16 @@ def _configure_stdout() -> None:
             pass
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    global RESULTS, STAGE
+    ap = argparse.ArgumentParser(description="用 B 的审计脚本审 C 的结果")
+    ap.add_argument("--results", default=None,
+                    help="被审结果目录（默认 05_results/main；v1.1 用 05_results/main_v1_1_near）")
+    args = ap.parse_args(argv)
+    if args.results:
+        RESULTS = Path(args.results).resolve()
+        STAGE = RESULTS / "_cross_audit_stage"
+
     _configure_stdout()
 
     # ---- 1. 按基准命名搭一个只含文件的临时目录

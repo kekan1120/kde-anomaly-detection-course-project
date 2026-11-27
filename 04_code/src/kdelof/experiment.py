@@ -170,7 +170,12 @@ def run_multiseed(cfg: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
                       ap_mean=("average_precision", "mean"), ap_std=("average_precision", "std"),
                       fpr_sparse_mean=("fpr_sparse", "mean"), fpr_sparse_std=("fpr_sparse", "std"),
                       fpr_dense_mean=("fpr_dense", "mean"), fpr_dense_std=("fpr_dense", "std"),
-                      recall_mean=("recall", "mean"))
+                      recall_mean=("recall", "mean"),
+                      # 分层补充：compact_void 召回是近似 0/1 的块状量，
+                      # 用 mean/min/max 三列检验「每个种子是否都整团同进」（不应出现中间值）
+                      recall_compact_void_mean=("recall_compact_void", "mean"),
+                      recall_compact_void_min=("recall_compact_void", "min"),
+                      recall_compact_void_max=("recall_compact_void", "max"))
                  .reset_index())
     return df, summary
 

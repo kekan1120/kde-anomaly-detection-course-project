@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 from pathlib import Path
@@ -29,6 +30,8 @@ from kdelof import protocol  # noqa: E402
 ROOT = HERE.parent
 RESULTS = ROOT / "05_results" / "main"
 BASELINE = ROOT / "05_results" / "ref_check"
+#: v1.0 正式结果（冻结），A13 的列集合与 NaN 结构对照物
+V10_DIR = ROOT / "05_results" / "main"
 RECORDS: list[dict] = []
 
 
@@ -45,10 +48,18 @@ def record(cid: str, name: str, passed: bool, detail: str) -> None:
     print(f"[{'PASS' if passed else 'FAIL'}] {cid} {name}")
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    global RESULTS
+    ap = argparse.ArgumentParser(description="C 的结果审计（13 项）")
+    ap.add_argument("--results", default=None,
+                    help="被审结果目录（默认 05_results/main；v1.1 用 05_results/main_v1_1_near）")
+    args = ap.parse_args(argv)
+    if args.results:
+        RESULTS = Path(args.results).resolve()
+
     _configure_stdout()
     cfg = protocol.load_config()
-    print(f"协议版本 {cfg['protocol_version']}")
+    print(f"协议版本 {cfg['protocol_version']}；被审目录 {RESULTS}")
     print("=" * 78)
 
     df = pd.read_csv(RESULTS / "metrics.csv")
@@ -177,17 +188,32 @@ def main() -> int:
     else:
         record("A12", "P1 多种子文件是否存在", True, "尚未生成（可选拓展），跳过")
 
-    # ---- A13 输出契约与基准对齐（D 的脚本按列名取值）
-    ref_csv = BASELINE / "metrics_ref.csv"
-    if ref_csv.exists():
-        cols_ref = set(pd.read_csv(ref_csv).columns)
-        cols_mine = set(df.columns)
-        ok = cols_ref == cols_mine
-        record("A13", "结果表列集合与 B 的基准完全一致（D 的绘图脚本可直接换数据源）", ok,
-               f"我的列数={len(cols_mine)}，基准列数={len(cols_ref)}，"
-               f"差集={sorted(cols_ref ^ cols_mine) or '无'}")
+    # ---- A13 输出契约与 v1.0 对齐（D 的脚本按列名取值；分层列由 NaN 变真值但列集合不变）
+    v10_csv = V10_DIR / "metrics.csv"
+    if v10_csv.exists():
+        v10 = pd.read_csv(v10_csv)
+        cols_same = list(df.columns) == list(v10.columns)
+        cur_void = sorted(pd.unique(df["n_anomaly_compact_void"]).tolist())
+        base_void = sorted(pd.unique(v10["n_anomaly_compact_void"]).tolist())
+        cur_rec_nan = bool(df["recall_compact_void"].isna().all())
+        base_rec_nan = bool(v10["recall_compact_void"].isna().all())
+
+        if cur_void == [0]:
+            # 当前就是 v1.0：两版都不含 compact_void，列集合与 NaN 结构必须一致
+            ok = cols_same and cur_rec_nan and base_void == [0] and base_rec_nan
+            detail = (f"v1.0 视角：列集合{'一致' if cols_same else '不一致'}；"
+                      f"两版均无 compact_void（n=0，recall=NaN）")
+        else:
+            # 当前是 v1.1：列集合不变；n_anomaly_compact_void 0→125；recall_compact_void NaN→实数
+            ok = (cols_same and cur_void == [125] and base_void == [0]
+                  and base_rec_nan and not cur_rec_nan)
+            detail = (f"v1.1 视角：列集合{'不变' if cols_same else '变了'}（{len(df.columns)} 列）；"
+                      f"n_anomaly_compact_void {base_void}→{cur_void}；"
+                      f"recall_compact_void {'NaN' if base_rec_nan else '实数'}→"
+                      f"{'NaN' if cur_rec_nan else f'实数（{df.recall_compact_void.min():.3f}–{df.recall_compact_void.max():.3f}）'}")
+        record("A13", "结果表列集合与 v1.0 一致；分层列的 NaN→实数翻转符合预期", ok, detail)
     else:
-        record("A13", "结果表列集合与基准一致", True, f"未找到基准 {ref_csv}，跳过（列数={len(df.columns)}）")
+        record("A13", "结果表列集合与 v1.0 一致", False, f"未找到 v1.0 结果 {v10_csv}")
 
     n_fail = sum(1 for r in RECORDS if r["status"] == "FAIL")
     print("=" * 78)

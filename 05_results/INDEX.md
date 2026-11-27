@@ -12,7 +12,7 @@
 | `B-v1.0-locked`（参考实现） | 同上 | `05_results/ref_check/` | `7f4990c` | 对账基准（见 §4 说明） | §3.4 可复现性举证、附录对账 |
 | ~~`B-v1.1-near`~~ | **无**：仅 `04_code/patches/config_patch_near.json`（待 B 签署） | **无**：B 签署前不得产出任何正式结果 | — | **未授权 / 待签** | 无 |
 | `B-v1.1-near`（参考实现） | `04_code/config_ref.json`（当前值） | `05_results/ref_check_v1.1/` | `442d9e6` | **B 已签署 2026-11-27**；属 post-hoc 修订，v1.0 仍为预注册主结果 | **不是论文主结果**；仅作 `anomaly_type` 分层补充，以及 C17 不变性契约 / C18 点级嵌套的举证 |
-| `B-v1.1-near`（C 正式实现） | `04_code/config_ref.json`（sha256 `3c91e55f4c5d197e…`） | `05_results/main_v1_1_near/` | C 本地提交（**未推**） | 已跑通：核验 17/17、与 B 的 v1.1 参考结果对账 39/39（max\|Δ\|=0） | post-hoc 分层补充；`recall_compact_void` 作块状量报告；**AUC/AP 禁止跨版本比较** |
+| `B-v1.1-near`（C 正式实现） | `04_code/config_ref.json`（sha256 `3c91e55f4c5d197e…`） | `05_results/main_v1_1_near/` | C 本地提交（**未推**） | 已跑通：核验 17/17、审计 13/13、B 脚本交叉审计 12/12、与 B 的 v1.1 参考结果对账 39/39（max\|Δ\|=0） | **论文主图仍只取 v1.0**；本行只作 post-hoc 分层补充，`recall_compact_void` 按块状量（125/125）报告，**AUC/AP 禁止跨版本比较** |
 
 > **2026-11-27 更新（B）**：上表第 3 行的「未授权 / 待签」是签署前的历史记录，保留不动。
 > B 已于 2026-11-27 签署并落地 `B-v1.1-near`，字段差异见 `04_code/config_ref.json`、

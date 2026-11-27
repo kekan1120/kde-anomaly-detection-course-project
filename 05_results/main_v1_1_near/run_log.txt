@@ -7,7 +7,7 @@ config_file      : D:\ml\_remote_clone\04_code\config_ref.json
 config_sha256    : 3c91e55f4c5d197e168465aaa2d73e0afac6f7b88684878fdcb115fded885219
 far.n_draw       : 250（n_test=125）
 接触顺序声明     : 参数网格与默认参数在运行本脚本之前已由 B 锁定；本脚本无任何按结果调参的入口
-运行开始时间     : 2026-11-27 12:46:31+0800
+运行开始时间     : 2026-11-27 12:56:39+0800
 python           : 3.13.5
 executable       : D:\ml\.venv\Scripts\python.exe
 platform         : Windows-11-10.0.26200-SP0
@@ -58,4 +58,16 @@ E3 方法对照 @ 默认操作点（h*=0.35, k*=20，均为运行前按 Silverma
   kde  AUC=0.9996 错排对=89.0 AP=0.9986 P=0.9579 R=1.0000 F1=0.9785 FPR=0.0110 FPR_dense=0.0000 FPR_sparse=0.0220
   lof  AUC=0.9995 错排对=129.0 AP=0.9980 P=0.9648 R=0.9880 F1=0.9763 FPR=0.0090 FPR_dense=0.0100 FPR_sparse=0.0080
 
-总运行时间: 2.5 s
+P1 多种子拓展（repeat 1..10，种子偏移 +10000*r，列表在跑测试前已公布）
+  kde  param=0.1   AUC=0.9998±0.0002 AP=0.9992±0.0006 FPR_sparse=0.0246±0.0130 FPR_dense=0.0040±0.0021
+  kde  param=0.2   AUC=0.9998±0.0001 AP=0.9994±0.0004 FPR_sparse=0.0256±0.0128 FPR_dense=0.0038±0.0022
+  kde  param=0.35  AUC=0.9999±0.0001 AP=0.9996±0.0003 FPR_sparse=0.0258±0.0127 FPR_dense=0.0024±0.0016
+  kde  param=0.5   AUC=0.9999±0.0000 AP=0.9998±0.0002 FPR_sparse=0.0232±0.0133 FPR_dense=0.0008±0.0010
+  kde  param=0.8   AUC=1.0000±0.0000 AP=0.9999±0.0001 FPR_sparse=0.0216±0.0139 FPR_dense=0.0000±0.0000
+  kde  param=1.2   AUC=1.0000±0.0000 AP=0.9999±0.0001 FPR_sparse=0.0232±0.0128 FPR_dense=0.0000±0.0000
+  lof  param=10    AUC=0.9997±0.0001 AP=0.9988±0.0005 FPR_sparse=0.0122±0.0082 FPR_dense=0.0138±0.0066
+  lof  param=20    AUC=0.9998±0.0001 AP=0.9992±0.0006 FPR_sparse=0.0110±0.0054 FPR_dense=0.0122±0.0048
+  lof  param=35    AUC=0.9998±0.0001 AP=0.9994±0.0004 FPR_sparse=0.0114±0.0052 FPR_dense=0.0134±0.0065
+  lof  param=50    AUC=0.9998±0.0001 AP=0.9993±0.0005 FPR_sparse=0.0122±0.0056 FPR_dense=0.0128±0.0064
+
+总运行时间: 9.4 s
