@@ -53,7 +53,7 @@
 | Q1–Q3 研究问题无歧义、可操作化 | [research-questions-hypotheses.md](research-questions-hypotheses.md) §1 | ☑ | ☑ | ☐ | ☐ |
 | H1–H4 可观测变量与推翻判据 | 同上 §2 | ☑ | ☑ | ☐ | ☐ |
 | 符号、得分方向、阈值方向 | 同上 §3 + [glossary.md](glossary.md) | ☑ | ☑ | ☐ | ☐ |
-| 数据划分 / 参数网格 / 指标定义 | `04_code/config_ref.json`（B-v1.0 锁定） | ☑ | ☑ | ☐ | ☐ |
+| 数据划分 / 参数网格 / 指标定义 | `04_code/config_ref.json`（**B-v1.1-near**；v1.0 冻结于 tag `v1.0-results-frozen`） | ☑ | ☑ | ☐ | ☐ |
 | H1/H4 合并为「带宽敏感性」主线 | [decision-log.md](decision-log.md) #14 | ☑ | ☑ | ☐ | ☐ |
 
 > 注：C 已在 `05_results/main/sanity_checks.md` 中对符号方向与阈值口径做 15 项核验（全 PASS），可作 C 确认的证据。
