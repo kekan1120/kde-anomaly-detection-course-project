@@ -119,17 +119,31 @@ def sample_gaussian_cluster(cfg: dict[str, Any], stream: str, n: int, repeat: in
     return np.asarray(spec["mean"], dtype=np.float64) + float(spec["fixed_scale"]) * Z
 
 
-def sample_far_ring(cfg: dict[str, Any], n: int, repeat: int = 0) -> np.ndarray:
-    """远端异常：绕原点的圆环上均匀采样（协议 §3.1）。
+def sample_far_ring(cfg: dict[str, Any], n_test: int, repeat: int = 0) -> np.ndarray:
+    """远端异常：绕原点的圆环上均匀采样（协议 §3.1；B-v1.1-near 起支持 ``n_draw``）。
 
-    抽取顺序写死为「先 theta 一次 ``uniform(n)``，再 r 一次 ``uniform(n)``」。
-    调换这两次调用会得到不同的样本，而样本不会报错 —— 只会让指纹对不上。
+    抽样口径（Q-A 裁定取「真嵌套」）：先按**固定的** ``n_draw`` 依次抽
+    ``theta ~ U(0, 2π, n_draw)`` 与 ``r ~ U(r_min, r_max, n_draw)``，再取前 ``n_test`` 行。
+    ``n_draw`` 不随 ``n_test`` 变化，因此任何 ``n_test <= n_draw`` 的配置都得到同一批点的
+    前 ``n_test`` 个（点级嵌套），且**随机数消耗量与 n_test 无关**。
+
+    ``n_draw`` 缺省时等于 ``n_test`` —— 这样 B-v1.0（无该字段、n_test=250）的行为逐位不变。
+
+    抽取顺序写死为「先 theta 一次，再 r 一次」。调换这两次调用不会报错，只会让指纹对不上。
     """
     spec = cfg["anomaly"]["types"]["far"]
+    n_test = int(n_test)
+    n_draw = int(spec.get("n_draw", n_test))
+    if n_test > n_draw:
+        raise ValueError(
+            f"far: n_test={n_test} 不能大于 n_draw={n_draw}"
+            "（协议 §3.1：先抽 n_draw 组 (theta, r)，再取前 n_test 行）"
+        )
     rng = protocol.make_rng(cfg, "test.anomaly.far", repeat)
-    theta = rng.uniform(0.0, 2.0 * np.pi, int(n))
-    radius = rng.uniform(float(spec["r_min"]), float(spec["r_max"]), int(n))
-    return np.column_stack([radius * np.cos(theta), radius * np.sin(theta)])
+    theta = rng.uniform(0.0, 2.0 * np.pi, n_draw)
+    radius = rng.uniform(float(spec["r_min"]), float(spec["r_max"]), n_draw)
+    X = np.column_stack([radius * np.cos(theta), radius * np.sin(theta)])
+    return X[:n_test]
 
 
 def sample_compact_void(cfg: dict[str, Any], n: int, repeat: int = 0) -> np.ndarray:
