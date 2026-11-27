@@ -1,4 +1,6 @@
-# 项目收尾清单（一页纸）
+# 项目收尾清单（一页纸·历史归档）
+
+> **状态：阶段 0 已于 2026-11-27 关闭，本文保留为历史记录。** 最新提交流程见 `07_submission/submission_checklist.md`。
 
 > 更新：2026-11-27　|　截止：**2026-12-01 23:41**
 > 组长：A 林辰旭　|　组名：瓦洛兰特
@@ -9,7 +11,7 @@
 - [x] 可证伪假设 `docs/research-questions-hypotheses.md`
 - [x] 术语表 `docs/glossary.md`（含 `inverted_cdf` 口径）
 - [x] 决策日志 `docs/decision-log.md`（#1–#20 + 待办 #21–24）
-- [ ] 阶段 0 关闭包 `docs/stage0-closure-checklist.md`（待 C 的 2.3 确认及 B/C 会话链接）
+- [x] 阶段 0 关闭包 `docs/stage0-closure-checklist.md`（2026-11-27 已关闭）
 - [x] B-v1.1 提案 `docs/protocol-change-B-v1.1.md` → B 已签署
 - [x] 论文引用口径 `docs/paper-citation-guide.md`
 - [x] 论文写作任务书 `docs/paper-writing-brief-for-D.md`
@@ -20,8 +22,8 @@
 
 - [x] 补 `04_code/run_checks.py` 的 **C3/C14** 适配（见 `05_results/main_v1_1_near/sanity_checks.md`）
 - [x] 跑 **v1.1 正式结果**（独立目录 `05_results/main_v1_1_near/`，未覆盖 v1.0）
-- [ ] 复核 D 的图表与正文数字（逐项回对 C 的结果）
-- [ ] 阶段 0 检查清单 C 行确认 + `member_C.md` 补会话链接（C3/C14 和正式结果已完成）
+- [x] 复核 D 的图表与正文数字（C 复核脚本 34 项全 PASS）
+- [x] 阶段 0 检查清单 C 行确认 + `member_C.md` 补 DSH 导出凭证
 
 ## 三、D（分析与论文）剩余
 
@@ -31,10 +33,10 @@
 
 ## 四、阶段 0 关闭（全组）
 
-- [ ] C 在 `docs/stage0-closure-checklist.md` 的 2.3 确认（D 已完成）
-- [ ] 四份记录均有会话链接（A、D 已填；B、C 待补，D 真实回合已记录）
-- [ ] A 在 `PROJECT_STATUS.md` 标记「阶段 0 已关闭」
-- [ ] 向助教确认 C 的 DSH 导出是否可替代公网会话链接（模板：`docs/ta-confirmation-request.md`）
+- [x] C 在 `docs/stage0-closure-checklist.md` 的 2.3 确认（D 已完成）
+- [x] 四份记录均有会话凭证（D 分享链接；A/C/B 均用 DSH 导出文件，规范见 [`session-link-policy.md`](session-link-policy.md)；B 于 2026-11-27 补填）
+- [x] A 在 `PROJECT_STATUS.md` 标记「阶段 0 已关闭」
+- [ ] 向助教确认 C 的 DSH 导出是否可替代公网会话链接（模板：`docs/ta-confirmation-request.md`；不阻塞阶段 0）
 
 ## 五、提交前 12 项检查
 

@@ -120,6 +120,13 @@ def main() -> int:
         found = re.search(pat, result_body) is not None
         check(f"正文无版本泄漏 {pat}", not found, "出现" if found else "未出现")
 
+    # ---- 8b 附录不得出现 v1.1 的指标数值
+    # D 在二轮把「正文」限定为附录之前（合理：附录要写当前配置版本），但那样只挡住了「正文混用」。
+    # 这里补一层：附录允许提版本号，不允许出现 v1.1 的指标值。
+    appendix = paper[paper.find("## 附录：复现索引"):] if "## 附录：复现索引" in paper else ""
+    v11_values = ["0.999644", "0.999128", "0.999484", "0.999664", "125/125"]
+    hits = [v for v in v11_values if v in appendix]
+    check("附录不含 v1.1 指标数值", not hits, f"命中 {hits}" if hits else "未出现（附录只提配置版本号）")
     # ---- 9 图资产
     assets = {p.name for p in (RESULTS / "figures_d").glob("*.png")}
     used = re.findall(r"figures_d/([A-Za-z0-9_.]+\.png)", paper)

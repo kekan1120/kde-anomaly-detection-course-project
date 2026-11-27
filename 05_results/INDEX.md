@@ -21,12 +21,10 @@
 > 以 `05_results/main/` 的新目录另立一行（本表由 C 维护）。
 
 
-**v1.1 的状态（重要）**：协议版本权归 B，`config_ref.json` 的 disclaimer 禁止同版本改字段。
-因此仓库内**不存在** `config_v1_1_near.json`，也**不会**有条目名为 `main_v1_1_near/` 的正式结果目录。
-目前只有三件待签件：`04_code/patches/config_patch_near.json`（三个字段差异 + change_record）、
-`04_code/patches/protocol_section12_row_draft.md`（§12 行草稿）、
-`04_code/patches/impact_checklist.md`（一页影响清单）。B 签署并给出新版本号后，
-才按该版本号建立配置与结果目录，并在本表新增一行。
+**v1.1 的状态（更新：B 已于 2026-11-27 签署并落地）**：`04_code/config_ref.json` 已升为 `B-v1.1-near`，
+C 的正式实现结果已产出到 `05_results/main_v1_1_near/`（见上表第 5 行），B 的参考实现见 `05_results/ref_check_v1.1/`。
+B 的签署件（`04_code/patches/`）与协议 §12 变更记录保留为留痕。注意：v1.1 为 **post-hoc 分层补充**，
+主结果仍以 `05_results/main/`（v1.0，tag `v1.0-results-frozen`）为准，AUC/AP 不得跨版本比较。
 
 机制诊断（若在签署前确有必要）只允许落到 `05_results/ad_hoc/near_enabled/`，
 `run_log.txt` 首两行固定为 `protocol=NOT LOCKED (awaiting B-v1.1)` 与 `status=ad-hoc`，

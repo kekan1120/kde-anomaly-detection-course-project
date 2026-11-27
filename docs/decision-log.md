@@ -31,7 +31,14 @@
 
 | # | 待办事项 | 责任人 | 备注 |
 |---|---|---|---|
-| 21 | 补 `run_checks.py` 的 C3/C14 适配后跑 **v1.1 正式结果** | C | 输出**新目录**，不得覆盖 v1.0 冻结结果 |
-| 22 | 论文撰写（主结果引 v1.0 far-only；near 待 C 正式结果） | D | 引用口径见 `docs/paper-citation-guide.md` |
-| 23 | 阶段 0 检查清单 C/D 签字 + 各自会话链接 | C、D | 见 `docs/stage0-closure-checklist.md` |
-| 24 | 最终打包 `07_submission/`（两份文件） | A | 截止 2026-12-01 23:41 |
+| 21 | ~~补 C3/C14 适配 + 跑 v1.1 正式结果~~ ✅ 已完成 | C | `05_results/main_v1_1_near/`：核验 17/17、审计 13/13、交叉 12/12、对账 39/39 |
+| 22 | ~~论文撰写~~ ✅ 已完成 | D | `06_paper/course_report.md`，C 复核 32 项 0 错误、0 跨版本混用 |
+| 23 | 阶段 0 签字（**C/D 已签**）；会话链接：C 用 `/export` 凭证待确认、**B 待填** | B、C | 见 `stage0-closure-checklist.md` |
+| 24 | 最终打包 `07_submission/`（两份 docx 已生成） | A | 待 B 链接后重跑 `build_submission.py` 并提交 |
+
+## 已确认决策（续）
+
+| # | 日期 | 决策 | 依据 |
+|---|---|---|---|
+| 25 | 2026-11-27 | **A、C 的 DSH 会话以「导出文件 + 仓库存档」作为等价凭证**（`member_A_session_export.md`、`member_C_session_export.md`）；D 用 DeepSeek 分享链接；B 待填。**规范见 `docs/session-link-policy.md`** | A 拍板；DSH 桌面端无公网分享服务 |
+| 26 | 2026-11-27 | B 已补 DSH 导出凭证 → **四份记录凭证齐备，阶段 0 关闭**；论文经 3 个子智能体（完整性/正确性/科学性）审查并完成 P0/P1 修正（判据修订披露、H2/H3 双判定、L1–L7 表、图注与附录复现表）；提交件升级为 PDF（16 页 / 38 页） | 子智能体审查报告 + A 汇总修复 |
