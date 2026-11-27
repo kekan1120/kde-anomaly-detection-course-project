@@ -21,6 +21,15 @@
 | A9 | 图资产、图号和图注 | `05_results/main/figures_d/`; `course_report.md` §4; `c_review_of_D.md` | 文件是否存在、正文引用、轴名、参数、阈值、分数方向和图号映射 | 待填写 | D / 待填 | 待核验 |
 | A10 | 提交包全文搜索 | 最终提交目录及 `course_report.md`、追溯表、互审和阶段 0 文件 | `near`、`compact_void`、`ai_draft`、`v1.1` 及相关数字的上下文 | 待填写 | D / 待填 | 待核验 |
 
+### A 类已执行核验（2026-11-27）
+
+- **A1：部分通过。** D 打开并对照 `05_results/main/metrics.csv`、`06_paper/course_report.md`、`05_results/main/e0_demo1d_peaks.csv` 和 `05_results/main/metrics_multiseed_summary.csv`。E1/E2/E3 的样本量、阈值、混淆矩阵、AUC、AP、召回、F1、分簇 FPR、E0 三档峰结构和多种子摘要均与论文四位小数一致；`py -3 04_code/review_D_numbers.py` 输出 34/34 PASS。`metrics_multiseed.csv` 独立复算得到 h=0.35 的稀疏簇 FPR 低于 2% 为 3/10，各带宽为 3–5/10，60/60 次 `fpr_sparse > fpr_dense`。保留一项表述风险：§4.3 的 H4 召回句列出 h=0.35、0.80、1.20，漏列同样达到 1.0000 的 h=0.50；该项不改变实验数字，状态为需局部确认。
+- **A2：通过。** `config_ref.v1.0.snapshot.json`、`seed_registry.csv` 和 `run_log.txt` 均显示 train=600、validation=1000、test=1250（正常 1000、far 异常 250），验证集超阈为 10/1000。运行日志同时记录三划分标签、缺失值和无重合检查。
+- **A3：通过。** v1.0 快照确认密集簇均值 `(-2,0)`、scale 0.5，稀疏簇均值 `(2,0)`、scale 1.0，far 半径 5–7、n=250、标准化 none；`04_code/src/kdelof/dgp.py` 和 `run_log.txt` 与配置中的生成公式和 v1.0 far-only 口径一致。当前 `01_protocol_and_data_dictionary.md` 的 B-v1.1-near 仅作版本背景，不替代 v1.0 快照。
+- **A4：部分通过。** `seed_registry.csv` 和 v1.0 配置中的各数据流种子与论文列出的主种子、E0 种子和 far 种子一致，扩展规则为 repeat 1–10、每次偏移 10000；运行日志记录了多种子运行。论文附录只列核心流的简写种子，未列 sparse 流等完整流键，暂记为“附录完整性需确认”，不影响主结果数值。
+
+**核验依据：** 本次记录来自 D 对仓库原始文件的打开、字段/行对照、代码实现查看、运行日志查看和独立计数；DeepSeek 回合 5 的表格只作为核验范围提示，不作为通过证据。
+
 ## B 类：需要 A 或 C 本人确认
 
 | ID | 核验项目 | 依据文件 | 本人需确认的内容 | 证据/回复 | 核验人/日期 | 状态 |
