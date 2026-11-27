@@ -1,0 +1,76 @@
+{
+  "kind": "config-patch-proposal",
+  "not_a_config_file": true,
+  "warning": [
+    "本文件不是配置文件，也不是数值真源。任何脚本都不得加载它来跑实验。",
+    "它只是 C 提交给 B 的字段差异提案，等待 B 决定是否升版本并落成正式配置。",
+    "在 B 签署之前，仓库内唯一的数值真源仍然是 04_code/config_ref.json（B-v1.0-locked）。"
+  ],
+
+  "applies_to": "04_code/config_ref.json",
+  "base_version": "B-v1.0-locked",
+  "base_sha256": "A9E7691BDF84906EBAD5BDBADF9E666DACE61B48C0C28C5213FEA9972482D20B",
+  "candidate_version_if_accepted": "B-v1.1-near",
+  "proposed_by": "C（实现与复现负责人）",
+  "decision_owner": "B（协议版本号与字段增删改）",
+  "origin_of_request": "A 的 docs/decision-log.md #15（启用空区紧凑簇异常），A 决定启用，B 决定如何入版本",
+  "status": "pending-signature",
+  "date_proposed": "2026-11-27",
+
+  "fields": [
+    { "path": "anomaly.types.near.enabled", "from": false, "to": true },
+    { "path": "anomaly.types.near.n_test", "from": 0, "to": 125 },
+    { "path": "anomaly.types.far.n_test", "from": 250, "to": 125 }
+  ],
+
+  "net_effect": {
+    "test_total": "1250（不变）",
+    "test_normal": "500 密集簇 + 500 稀疏簇（不变）",
+    "test_anomaly": "125 far + 125 compact_void = 250，异常比例仍 20.0%",
+    "row_order": "[dense, sparse, far, near]（协议 §9 既有约定，near 追加在末尾）"
+  },
+
+  "invariants_under_patch": [
+    "data.splits 的样本量与用途",
+    "data.preprocessing.scaling = none",
+    "detectors.kde.bandwidth_grid = [0.10, 0.20, 0.35, 0.50, 0.80, 1.20]",
+    "detectors.lof.n_neighbors_grid = [10, 20, 35, 50]",
+    "parameter_selection_rule 默认 h*=0.35, k*=20",
+    "threshold：validation 正常分数 0.99 分位数，method=inverted_cdf，严格大于",
+    "metrics 定义与取整规则",
+    "seeds.streams 全部 10 个数据流种子（含 test.anomaly.near = 1733）"
+  ],
+
+  "open_questions_for_B": [
+    "Q-A far 抽样是否要与 v1.0 点级可比：A=承认不嵌套（只比统计量）／B=仍抽 250 组再取前 125（需在 §3.1 增补一句抽样口径）",
+    "Q-B 版本号与生效方式：是否接受 B-v1.1-near；若不接受，请指定版本号",
+    "Q-C v1.1 是否跑 10 种子重复（C 建议跑：near 召回近似 0/1 块状量，只有多种子才能谈稳定性）"
+  ],
+
+  "change_record": {
+    "from_version": "B-v1.0-locked",
+    "to_version": "B-v1.1-near（拟，待 B 确认）",
+    "date": "待 B 填（以锁定时刻为准）",
+    "decision_ref": "docs/decision-log.md #15 (A)",
+    "changed_fields": [
+      "anomaly.types.near.enabled: false -> true",
+      "anomaly.types.near.n_test: 0 -> 125",
+      "anomaly.types.far.n_test: 250 -> 125"
+    ],
+    "unchanged": [
+      "数据划分与样本量",
+      "带宽 / 邻居数网格",
+      "默认参数 h*=0.35, k*=20",
+      "阈值规则 inverted_cdf(0.99) 与严格大于判定",
+      "指标定义",
+      "随机种子与数据流"
+    ],
+    "test_results_seen_before_change": true,
+    "what_was_seen": "v1.0 全部结果：E1/E2/E3 共 12 行、AUC 全配置 >= 0.9990 已饱和、分簇 FPR 分解（h*=0.35 时密集簇 0/500、稀疏簇 11/500）、E0 峰结构；A 据此判断 v1.0 无法区分两法并提出 #15",
+    "what_was_not_seen": "任何包含 compact_void 样本的指标（该版本结果尚未生成）",
+    "selection_bias_control": "变更由 A 的设计判断与任务书「指出各自适用形态与失效场景」的要求驱动，未依据 compact_void 的任何指标择优；网格、默认参数、阈值规则保持锁定，故新版本与原版本可在同一操作点比较",
+    "status": "post-hoc protocol amendment（事后修订，非预注册）",
+    "mechanism_caveat": "C 的解析推理表明：在 novelty=True 且参照集仅含 600 个正常训练样本时，空区紧凑簇点的 k 近邻只能来自正常簇尾部（距离约 2.4-3.2），lrd(q) 由该距离决定而与团内紧密程度无关，故 LOF 约 2-4，高于阈值(约 1.89-2.02)，会被判为异常。B 协议 §3.2「局部密度很高 -> LOF 判正常」的推断对应的是参照集包含该团的情形（非 novelty 或污染训练集）。因此本变更不预期产生「KDE 检出、LOF 漏检」的对照；若需要该对照，应另立 P2 污染训练集实验。",
+    "paper_obligation": "若 B 接受：新版本必须在论文中标注为 post-hoc，并与 v1.0（预注册主结果）并列报告；每类异常仅 125 个，单点变化 = 0.8 个百分点，compact_void 召回为近似 0/1 块状量，AUC/AP 不得跨版本比较"
+  }
+}

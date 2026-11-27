@@ -10,10 +10,18 @@
 |---|---|---|---|---|---|
 | `B-v1.0-locked` | `04_code/config_ref.json` | `05_results/main/` | `7f4990c`（tag `v1.0-results-frozen`） | **冻结 / 预注册主结果** | §4 主表、主图（E0/E1/E2/E3）、技术路线与局限 |
 | `B-v1.0-locked`（参考实现） | 同上 | `05_results/ref_check/` | `7f4990c` | 对账基准（见 §4 说明） | §3.4 可复现性举证、附录对账 |
-| `B-v1.1-near` | `04_code/config_v1_1_near.json`（待建） | `05_results/main_v1_1_near/`（待建） | — | **计划中 / post-hoc 分层分析** | 只出一张分层召回与分数分布图；不替代 v1.0 |
+| ~~`B-v1.1-near`~~ | **无**：仅 `04_code/patches/config_patch_near.json`（待 B 签署） | **无**：B 签署前不得产出任何正式结果 | — | **未授权 / 待签** | 无 |
 
-`B-v1.1-near` 的变更：`anomaly.types.near.enabled=false→true`、`near.n_test 0→125`、
-`far.n_test 250→125`（测试集仍 1250 条、异常 250 条、比例 20%）。决策依据：A 的 `docs/decision-log.md` #15。
+**v1.1 的状态（重要）**：协议版本权归 B，`config_ref.json` 的 disclaimer 禁止同版本改字段。
+因此仓库内**不存在** `config_v1_1_near.json`，也**不会**有条目名为 `main_v1_1_near/` 的正式结果目录。
+目前只有三件待签件：`04_code/patches/config_patch_near.json`（三个字段差异 + change_record）、
+`04_code/patches/protocol_section12_row_draft.md`（§12 行草稿）、
+`04_code/patches/impact_checklist.md`（一页影响清单）。B 签署并给出新版本号后，
+才按该版本号建立配置与结果目录，并在本表新增一行。
+
+机制诊断（若在签署前确有必要）只允许落到 `05_results/ad_hoc/near_enabled/`，
+`run_log.txt` 首两行固定为 `protocol=NOT LOCKED (awaiting B-v1.1)` 与 `status=ad-hoc`，
+结果文件命名 `metrics_ad_hoc.csv`，**不得作为论文主结果**，也不进本表。
 
 ## 2. v1.0 关键文件的 sha256（前 16 位）
 
@@ -48,14 +56,11 @@ B 的**原始**文件保存在 `kde-anomaly-detection-handoff` 压缩包中。
 - 若 B 后续推送其原始结果：**以其为准**，本目录降级为「回归副本」，不得再作为原始凭证引用。
 - 它不属于正式结果，不作为论文数据源。
 
-## 5. v1.1 的预测与待定项（跑之前写，跑之后对照）
+## 5. 若 B 签署：预测与待定项（跑之前写，跑之后对照）
 
-**待 A/B 拍板两项**
-
-| # | 问题 | 选项 | C 的建议 |
-|---|---|---|---|
-| 1 | far 抽样是否与 v1.0 点级可比 | A 承认不嵌套（只比统计量）／B 显式抽 250 再取前 125 | **B**：代价只是一句协议口径，换来 far 侧逐位可比，能把 v1.1 的变化完全归因到 near |
-| 2 | v1.1 是否跑 10 种子 | 跑／不跑 | **跑**（约 20 s）；否则 near 的「整团同进」没有稳定性证据 |
+待定项与影响范围已移到 `04_code/patches/`（`config_patch_near.json` 的 `open_questions_for_B`、
+`protocol_section12_row_draft.md` §3、`impact_checklist.md`）。本节只保留**跑前预测**，
+用于事后对照机制是否符合预期；**它不是结果**，任何论文数字不得引用本节。
 
 **预测表（v1.1 相对 v1.0，默认操作点 h\*=0.35 / k\*=20）**
 
@@ -79,8 +84,8 @@ B 的**原始**文件保存在 `kde-anomaly-detection-handoff` 压缩包中。
 
 | 位置 | 内容 | 归属 |
 |---|---|---|
-| `01_protocol_and_data_dictionary.md` §12 | 协议变更行（改动项/理由/是否接触测试集） | B（C 起草） |
-| `04_code/config_v1_1_near.json` → `change_record` | 机器可读变更块 | C |
+| `01_protocol_and_data_dictionary.md` §12 | 协议变更行（草稿在 `04_code/patches/protocol_section12_row_draft.md`） | B（C 起草） |
+| `04_code/patches/config_patch_near.json` → `change_record` | 机器可读变更块（**不是配置文件**） | C |
 | `docs/decision-log.md` #15 | A 的决策原文 | A |
 | 各结果目录的 `run_log.txt` | 运行时打印 `protocol_version` + 配置路径/sha256 + 变更块 | C |
 
@@ -89,4 +94,4 @@ B 的**原始**文件保存在 `kde-anomaly-detection-handoff` 压缩包中。
 | tag | 指向 | 含义 |
 |---|---|---|
 | `v1.0-results-frozen` | `7f4990c` | v1.0 结果与配置的冻结点；对账/复现以此为准 |
-| `v1.1-near-results` | （待打） | v1.1 跑通并通过不变性契约后才打 |
+| `v1.1-near-results` | （不得打） | 仅当 B 签署新版本号、跑通并通过不变性契约后才可打；签前禁止 |
