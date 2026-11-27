@@ -62,7 +62,7 @@
 
 | 成员 | 文件 | 会话分享链接 | 状态 |
 |---|---|---|---|
-| A | [member_A.md](../process-logs/member_A.md) | 待填 | 已建，待补链接 |
+| A | [member_A.md](../process-logs/member_A.md) | session-d74f302b-694c-4833-9469-70713f36e171 | 已建，链接已填 |
 | B | [member_B.md](../process-logs/member_B.md) | 待填 | **模板已建，待本人填真实回合** |
 | C | [member_C.md](../process-logs/member_C.md) | 待填 | 已建，待补链接 |
 | D | [member_D.md](../process-logs/member_D.md) | 待填 | **模板已建，待本人填真实回合** |
@@ -75,7 +75,7 @@
 
 - [ ] 条件 3：四人确认表全部打勾（当前 1/4）
 - [ ] 条件 4：四人核准表全部打勾（当前仅 A）
-- [ ] 条件 5：四份记录均有可访问的会话分享链接（当前 0/4 已填链接）
+- [ ] 条件 5：四份记录均有可访问的会话分享链接（当前 1/4 已填链接）
 
 ## 六、剩余动作分工
 
