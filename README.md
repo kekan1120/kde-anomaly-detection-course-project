@@ -19,6 +19,7 @@
 | `env/` | 依赖锁定与环境自查 | C |
 
 > 说明：A 的 AI 草稿代码/结果统一收纳在 `04_code/ai_draft/` 与 `05_results/ai_draft/`，与 C 的正式实现（`04_code/src/`、`05_results/main/`）**物理隔离、不混用**；论文数值以 `05_results/main/` 为准。
+> **A 侧草稿的部分设计已被证伪**（boundary 球壳标签矛盾、compact@(0,0) 位于两簇鞍部），详见 `docs/experiment-protocol.md` §10 第 5 条；该草稿作为「设计迭代记录」保留，不进入论文主结果。
 
 ## 关键入口
 
