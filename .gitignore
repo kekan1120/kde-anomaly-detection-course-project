@@ -6,3 +6,8 @@ venv/
 .ipynb_checkpoints/
 results/*.tmp
 results/*.log
+
+# C 追加：交叉审计的临时暂存目录、冒烟输出
+05_results/main/_cross_audit_stage/
+05_results/smoke/
+results/main/_cross_audit_stage/

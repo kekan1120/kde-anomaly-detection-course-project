@@ -1,0 +1,24 @@
+# Minimum / ranged requirements.
+#
+# Use this ONLY when requirements_lock.txt cannot be installed -- typically when
+# the machine runs a different Python minor version for which the exact pinned
+# versions have no binary wheel, or when pip has to resolve a slightly newer
+# patch release.
+#
+# Lower bounds are not arbitrary:
+#   numpy >= 1.22   numpy.quantile(..., method="inverted_cdf") is required by the
+#                   locked threshold rule; the `method=` keyword does not exist
+#                   before 1.22.
+#   scipy >= 1.7    scipy.special.logsumexp / scipy.spatial.distance.cdist
+#   scikit-learn >= 1.0   KernelDensity and LocalOutlierFactor(novelty=True)
+#   matplotlib >= 3.5, pandas >= 1.3   figures and CSV output
+#
+# If you end up on this file, RECORD the versions you actually got:
+#     .venv\Scripts\python.exe env\freeze_env.py
+# and copy the resulting requirements_lock.txt into your own run log.
+
+numpy>=1.22,<3
+scipy>=1.7,<2
+scikit-learn>=1.0,<2
+matplotlib>=3.5,<4
+pandas>=1.3,<4

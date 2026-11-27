@@ -1,0 +1,314 @@
+{
+  "author_role": "C 实现与复现负责人",
+  "baseline": "B 的 05_results/ref_check（另一台机器，Python 3.14.6）",
+  "tolerances": {
+    "data_sha256": "逐位相等",
+    "data_stats": 1e-12,
+    "metrics_float": 1e-09,
+    "e0": 0.0001
+  },
+  "n_items": 50,
+  "n_fail": 0,
+  "items": [
+    {
+      "section": "数据层",
+      "item": "train.sha256",
+      "status": "PASS",
+      "detail": "bbe5881fa6b3acc65340fea280fd2835 vs bbe5881fa6b3acc65340fea280fd2835"
+    },
+    {
+      "section": "数据层",
+      "item": "train.stats",
+      "status": "PASS",
+      "detail": "相对容差判据 1e-12，实测最大相对偏差 0.000e+00"
+    },
+    {
+      "section": "数据层",
+      "item": "validation.sha256",
+      "status": "PASS",
+      "detail": "ac03679b6fab71e2e58688cacb380bb7 vs ac03679b6fab71e2e58688cacb380bb7"
+    },
+    {
+      "section": "数据层",
+      "item": "validation.stats",
+      "status": "PASS",
+      "detail": "相对容差判据 1e-12，实测最大相对偏差 0.000e+00"
+    },
+    {
+      "section": "数据层",
+      "item": "test.sha256",
+      "status": "PASS",
+      "detail": "e00edf67e4bb128d430cf14d430f274f vs e00edf67e4bb128d430cf14d430f274f"
+    },
+    {
+      "section": "数据层",
+      "item": "test.stats",
+      "status": "PASS",
+      "detail": "相对容差判据 1e-12，实测最大相对偏差 0.000e+00"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[kde:0.1]",
+      "status": "PASS",
+      "detail": "C=15.727733，HANDOFF §3.3=15.727733，偏差=4.56e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[kde:0.2]",
+      "status": "PASS",
+      "detail": "C=7.896117，HANDOFF §3.3=7.896117，偏差=1.37e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[kde:0.35]",
+      "status": "PASS",
+      "detail": "C=6.176033，HANDOFF §3.3=6.176033，偏差=2.46e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[kde:0.5]",
+      "status": "PASS",
+      "detail": "C=5.777108，HANDOFF §3.3=5.777108，偏差=2.31e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[kde:0.8]",
+      "status": "PASS",
+      "detail": "C=5.249742，HANDOFF §3.3=5.249742，偏差=4.64e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[kde:1.2]",
+      "status": "PASS",
+      "detail": "C=4.801341，HANDOFF §3.3=4.801341，偏差=4.85e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[lof:10]",
+      "status": "PASS",
+      "detail": "C=1.893115，HANDOFF §3.3=1.893115，偏差=4.59e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[lof:20]",
+      "status": "PASS",
+      "detail": "C=2.022293，HANDOFF §3.3=2.022293，偏差=1.68e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[lof:35]",
+      "status": "PASS",
+      "detail": "C=1.966556，HANDOFF §3.3=1.966556，偏差=4.13e-07"
+    },
+    {
+      "section": "阈值层",
+      "item": "threshold[lof:50]",
+      "status": "PASS",
+      "detail": "C=1.937930，HANDOFF §3.3=1.937930，偏差=4.01e-07"
+    },
+    {
+      "section": "指标层",
+      "item": "n",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "n_normal",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "n_anomaly",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "prevalence",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "n_normal_dense",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "n_normal_sparse",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "n_anomaly_far",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "n_anomaly_compact_void",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "threshold",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "val_exceedance_count",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "val_exceedance_rate",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "tp",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "fp",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "tn",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "fn",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "precision",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "recall",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "f1",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "fpr_overall",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "fpr_dense",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "fpr_sparse",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "fp_dense",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "fp_sparse",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "recall_far",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "recall_compact_void",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "roc_auc",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "average_precision",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "n_inversion_pairs_equiv",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "val_mean_log_likelihood",
+      "status": "PASS",
+      "detail": "最大绝对偏差=0.000e+00，NaN 结构不一致点=0（容差 1e-09）"
+    },
+    {
+      "section": "指标层",
+      "item": "param_name",
+      "status": "PASS",
+      "detail": "bandwidth / n_neighbors 标签一致"
+    },
+    {
+      "section": "多种子层",
+      "item": "10 个 seeds 的均值/标准差/召回",
+      "status": "PASS",
+      "detail": "共 12 列，最大绝对偏差=0.000e+00（容差 1e-09）"
+    },
+    {
+      "section": "E0 层",
+      "item": "h=0.08",
+      "status": "PASS",
+      "detail": "C: 局部极大=8/显著峰=2/最大密度=1.0705/谷填充率=0.0007；基准: 8/2/1.0705/0.0007"
+    },
+    {
+      "section": "E0 层",
+      "item": "h=0.3",
+      "status": "PASS",
+      "detail": "C: 局部极大=3/显著峰=2/最大密度=0.6254/谷填充率=0.1581；基准: 3/2/0.6254/0.1581"
+    },
+    {
+      "section": "E0 层",
+      "item": "h=0.9",
+      "status": "PASS",
+      "detail": "C: 局部极大=2/显著峰=1/最大密度=0.2629/谷填充率=0.9140；基准: 2/1/0.2629/0.9140"
+    }
+  ]
+}

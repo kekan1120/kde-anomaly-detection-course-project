@@ -1,0 +1,310 @@
+{
+  "protocol_version": "B-v1.0-locked",
+  "protocol_locked_utc": "TBD-by-team",
+  "owner": "B 数据与实验设计负责人",
+  "consumers": ["C 实现与复现负责人", "D 分析与论文整合负责人", "A 组长兼理论负责人"],
+  "spec_document": "01_protocol_and_data_dictionary.md",
+  "disclaimer": "本文件中所有数值在运行任何实验之前锁定。测试集指标一经产出，禁止反向修改本文件任何字段。若必须修改，须新建 protocol_version 并记录原因。",
+
+  "rng": {
+    "bit_generator": "PCG64",
+    "numpy_api": "numpy.random.Generator(numpy.random.PCG64(seed))",
+    "policy": "每个数据流使用独立 Generator，流之间不共享随机数消耗顺序，因此实现顺序不影响结果。",
+    "draw_order_per_stream": "先调用一个采样函数，再按簇定义中的 fixed_scale 线性变换；具体见各数据流条目。",
+    "model_randomness": "KernelDensity 与 LocalOutlierFactor(novelty=True) 均为确定性算法，不消耗随机数，无需模型种子。"
+  },
+
+  "data": {
+    "dimension": 2,
+    "clusters": {
+      "dense": {
+        "cluster_id": 0,
+        "mean": [-2.0, 0.0],
+        "cov_diag": [0.25, 0.25],
+        "fixed_scale": 0.5,
+        "sampling": "X = mean + 0.5 * Z, Z = rng.standard_normal((n, 2))",
+        "note": "等价于 N(mean, 0.25*I)；用对角 Cholesky 显式写法而非 multivariate_normal，保证跨语言/跨版本可复现。"
+      },
+      "sparse": {
+        "cluster_id": 1,
+        "mean": [2.0, 0.0],
+        "cov_diag": [1.0, 1.0],
+        "fixed_scale": 1.0,
+        "sampling": "X = mean + 1.0 * Z, Z = rng.standard_normal((n, 2))",
+        "note": "等价于 N(mean, 1.0*I)。"
+      }
+    },
+    "splits": {
+      "train": {
+        "purpose": "拟合 KDE 与 LOF，只含正常样本",
+        "n_dense": 300,
+        "n_sparse": 300,
+        "n_anomaly": 0,
+        "total": 600
+      },
+      "validation": {
+        "purpose": "为每个 (detector, param) 校准阈值，只含正常样本；不作为其他用途",
+        "n_dense": 500,
+        "n_sparse": 500,
+        "n_anomaly": 0,
+        "total": 1000
+      },
+      "test": {
+        "purpose": "最终一次性评估，正常样本 + 预先定义的异常样本",
+        "n_dense": 500,
+        "n_sparse": 500,
+        "n_anomaly": 250,
+        "total": 1250,
+        "anomaly_ratio": 0.2
+      }
+    },
+    "size_rationale": {
+      "train_600": "满足 LOF 最大 k=50 且 k/n=8.3%；同时使 Silverman 参考带宽按每簇 n_c=300 计算得到可解释的网格。",
+      "validation_1000": "99% 分位数由 10 个次序统计量决定（而非 600 时的 6 个），降低阈值估计噪声。",
+      "test_1250": "每簇正常样本 500 个，分簇误报率分辨率 0.2%；异常 250 个，召回率分辨率 0.4%。异常比例恰为 20.0%。"
+    },
+    "preprocessing": {
+      "scaling": "none",
+      "rationale": "两个簇的坐标尺度已可比（密集簇 sd=0.5，稀疏簇 sd=1.0），不做标准化以少一个自由变量；标准化会改变簇间几何关系，属于拓展实验。",
+      "if_scaled_later": "任何标准化/变换一律只在 train 上 fit，再 transform 到 validation 与 test；禁止全局 fit。"
+    }
+  },
+
+  "anomaly": {
+    "label_convention": {
+      "normal": 0,
+      "anomaly": 1,
+      "cluster_id_normal": "0 或 1（继承生成簇）",
+      "cluster_id_anomaly": -1,
+      "anomaly_type_normal": "none"
+    },
+    "types": {
+      "far": {
+        "enabled": true,
+        "type_id": "far",
+        "construction": "ring_uniform",
+        "formula": "theta ~ Uniform(0, 2*pi, n); r ~ Uniform(5.0, 7.0, n); X = column_stack([r*cos(theta), r*sin(theta)])",
+        "draw_order": "先 theta（一次 uniform(n) 调用），再 r（一次 uniform(n) 调用）",
+        "r_min": 5.0,
+        "r_max": 7.0,
+        "min_distance_to_nearest_cluster_center": 3.0,
+        "min_distance_derivation": "环上距原点最近点 r=5 落在 (±5,0)；与最近簇中心 (±2,0) 的距离为 5-2=3。稀疏簇 sd=1.0，故最近处仍为 3σ。",
+        "n_test": 250,
+        "role": "核心情形（任务书要求『至少包含远端异常』）"
+      },
+      "near": {
+        "enabled": false,
+        "type_id": "compact_void",
+        "construction": "compact_gaussian",
+        "seed_key": "test.anomaly.near",
+        "formula": "X = [0.0, 5.0] + 0.35 * rng.standard_normal((n, 2))",
+        "center": [0.0, 5.0],
+        "cov_diag": [0.1225, 0.1225],
+        "fixed_scale": 0.35,
+        "n_test": 0,
+        "role": "可选拓展 P1（局部/边界异常）。启用时须把 near.n_test 设为 125、far.n_test 改为 125，使二者之和仍为 250 且测试异常比例保持 20%；主结果须按 anomaly_type 分层报告。",
+        "label_rule": "标签恒为 1，由生成位置决定，不由任何检测器输出决定。",
+        "design_note": "这是「空区中的紧凑小簇」：离两个正常簇都很远（绝对密度极低，KDE 必然判为异常），但内部点彼此很近（局部密度高，LOF 会判为正常）。它不是球壳式边界异常。",
+        "why_not_a_shell": "以稀疏簇为参照的 2.5σ 球壳在几何上不成立：稀疏簇 sd=1.0，二维标准高斯 P(r>=2.5)=exp(-3.125)=4.39%，即 500 个正常稀疏簇点里约有 22 个落在球壳之外。这些正常点密度更低、异常分数比被标注为异常的球壳点还高，标签体系自相矛盾，任何检测器都无法在该子集上取得合理召回。要消除矛盾需 r>=4.0σ，但 r=4 处已与远端异常环重叠，不再构成独立的「局部」类型。故改用空区紧凑簇。"
+      }
+    }
+  },
+
+  "demo_1d": {
+    "purpose": "仅用于展示带宽由小到大的平滑化与多峰抹平现象，是原理图示，不进入任何二维检测性能汇总",
+    "dimension": 1,
+    "components": {
+      "dense": {"mean": -1.5, "sd": 0.30, "n": 120, "seed_key": "demo1d.dense"},
+      "sparse": {"mean": 1.5, "sd": 0.80, "n": 80, "seed_key": "demo1d.sparse"}
+    },
+    "total": 200,
+    "sampling": "X = mean + sd * rng.standard_normal(n)，一维数组",
+    "bandwidths": [0.08, 0.30, 0.90],
+    "bandwidth_roles": {
+      "0.08": "small：低于密集分量参考带宽 0.104，曲线崎岖、方差大",
+      "0.30": "medium：约等于稀疏分量参考带宽 0.277，两峰清晰",
+      "0.90": "large：约 1.6 倍混合参考带宽 0.554，两峰被抹平"
+    },
+    "plot_grid": {"x_min": -5.0, "x_max": 5.0, "n_points": 1001}
+  },
+
+  "seeds": {
+    "policy": "每个数据流独立整数种子，前缀与规划 PDF 的 train=1701 / validation=1702 / test=1703 对齐，其余流按 +10 递增。",
+    "streams": {
+      "train.dense": 1701,
+      "train.sparse": 1711,
+      "validation.dense": 1702,
+      "validation.sparse": 1712,
+      "test.dense": 1703,
+      "test.sparse": 1713,
+      "test.anomaly.far": 1723,
+      "test.anomaly.near": 1733,
+      "demo1d.dense": 1704,
+      "demo1d.sparse": 1714
+    },
+    "extension_repeats": {
+      "declared": true,
+      "core_repeat": 0,
+      "repeat_ids": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+      "seed_offset_per_repeat": 10000,
+      "note": "拓展 P1 多种子重复。repeat r 的每个数据流种子 = 上表种子 + 10000*r。该列表在查看任何测试结果之前公布，不得按结果增删。"
+    }
+  },
+
+  "detectors": {
+    "kde": {
+      "implementation": "sklearn.neighbors.KernelDensity",
+      "kernel": "gaussian",
+      "bandwidth_grid": [0.1, 0.2, 0.35, 0.5, 0.8, 1.2],
+      "default_bandwidth": 0.35,
+      "fit_data": "train 正常样本（600 点）",
+      "raw_output": "score_samples(X) = log 密度估计（越大越正常）",
+      "anomaly_score": "s = -score_samples(X)",
+      "score_direction": "越大越异常",
+      "grid_justification": {
+        "method": "Silverman 经验带宽 h_ref = sigma * n_c^(-1/(d+4))，d=2 故指数为 -1/6，n_c=300 时 n_c^(-1/6)=0.3866",
+        "dense_cluster_h_ref": 0.193,
+        "sparse_cluster_h_ref": 0.387,
+        "pooled_mixture_h_ref": 0.831,
+        "pooled_derivation": "E[X^2]=0.5*(0.25+4)+0.5*(1+4)=4.625，Var=4.625，sd=2.1506，h_ref=2.1506*0.3866=0.831",
+        "coverage": "网格覆盖密集簇参考带宽的 0.52x 到 6.2x，覆盖混合数据经验带宽 0.83x 到 1.44x",
+        "deviation_from_plan_pdf": "在规划 PDF 建议的 {0.2, 0.35, 0.5, 0.8, 1.2} 上增加 h=0.10。原因：原网格最小值 0.20 已接近密集簇参考带宽 0.193，缺少『明显偏小、曲线崎岖』的一端，H1 的欠平滑侧无观测点。此项调整在运行任何实验之前完成，依据仅为数据生成参数（先验已知），与测试表现无关。"
+      }
+    },
+    "lof": {
+      "implementation": "sklearn.neighbors.LocalOutlierFactor",
+      "novelty": true,
+      "n_neighbors_grid": [10, 20, 35, 50],
+      "default_n_neighbors": 20,
+      "metric": "euclidean",
+      "fit_data": "train 正常样本（600 点），novelty=True 以支持对新样本打分",
+      "raw_output": "score_samples(X) = negative_outlier_factor（越大越正常）",
+      "anomaly_score": "s = -score_samples(X)（数值上约等于 LOF 本身，正常点约 1.0）",
+      "score_direction": "越大越异常",
+      "score_sign_must_be_verified": "禁止按函数名推断符号，必须用 checks.py 的方向断言实测确认后再使用"
+    }
+  },
+
+  "threshold": {
+    "source": "validation 正常样本的异常分数（每个 detector x 每个参数配置各自独立计算）",
+    "quantile": 0.99,
+    "numpy_method": "inverted_cdf",
+    "call": "threshold = numpy.quantile(scores_val, 0.99, method='inverted_cdf')",
+    "prediction_rule": "predict_anomaly = (score > threshold)，严格大于",
+    "tie_handling": "分数并列时，等于阈值的样本判为正常。连续分数下不出现并列；若出现，须在运行日志中记录并列数量。",
+    "target_fpr": 0.01,
+    "expected_val_exceedance_count": 10,
+    "expected_val_exceedance_note": "n_val=1000，inverted_cdf 在 q=0.99 下取第 ceil(0.99*1000)=990 个次序统计量（0-based 索引 989），故验证集上严格超过阈值的样本数为 10，经验误报率 1.00%。若改用 numpy 默认 method='linear' 或 'higher' 会得到不同阈值，跨实现比对时必须统一到 inverted_cdf。",
+    "disclaimer": "1% 只是验证集上的设定目标，不承诺测试集严格达到 1%。测试集经验误报率须单独报告。",
+    "test_data_never_used": "阈值只看 validation 正常分数；测试集只在参数与流程全部锁定后评估一次。"
+  },
+
+  "metrics": {
+    "threshold_free": {
+      "roc_auc": {
+        "call": "sklearn.metrics.roc_auc_score(y_true, score)",
+        "input": "score 为异常分数，越大越异常",
+        "meaning": "衡量异常分数排序能力，不依赖阈值",
+        "report_both_classes": "测试集同时含正常与异常，无单类退化问题；若某次划分出现单类，须显式记录为 NA 而非 0 或 0.5"
+      },
+      "average_precision": {
+        "call": "sklearn.metrics.average_precision_score(y_true, score)",
+        "definition": "sklearn 的 step-wise AP（沿 PR 曲线以阶梯方式求和），非梯形积分平均值；与 PR-AUC(trapezoid) 不同，报告中须注明",
+        "must_report_prevalence": "必须同时报告测试集异常比例 0.2，因为 AP 受类别比例强烈影响"
+      }
+    },
+    "at_threshold": {
+      "confusion_matrix": "sklearn.metrics.confusion_matrix(y_true, y_pred, labels=[0,1])，输出顺序 [[TN, FP], [FN, TP]]",
+      "precision": "TP/(TP+FP)，分母为 0 时记 NA",
+      "recall": "TP/(TP+FN)，即异常召回率，分母为 0 时记 NA",
+      "f1": "2PR/(P+R)，P 或 R 为 NA 时记 NA",
+      "fpr_overall": "FP_normal/(TN+FP)，即正常测试样本中判为异常的比例",
+      "fpr_dense_cluster": "在 test 正常样本中 cluster_id==0 的子集上的误报率",
+      "fpr_sparse_cluster": "在 test 正常样本中 cluster_id==1 的子集上的误报率",
+      "fpr_by_cluster_requirement": "必须分簇报告；总 FPR 会掩盖稀疏正常簇被系统性误报。这是 H2 的唯一直接证据。",
+      "fpr_recall_by_anomaly_type": "若启用多种异常类型，须按 anomaly_type 分层报告召回率"
+    },
+    "diagnostics_not_decisions": {
+      "kde_val_mean_log_likelihood": "validation 正常样本上 score_samples 的均值（密度估计目标）。仅作诊断与 H4 对照，不得用于主结论的参数选择。",
+      "n_support_features": "各 split 的样本数、每簇计数、缺失值计数，须与配置逐项核对"
+    },
+    "rounding": "论文正文保留 4 位小数；CSV 保存完整精度（repr 默认）。所有派生量（差、比值）由未取整的原始值计算后再取整。"
+  },
+
+  "parameter_selection_rule": {
+    "primary_for_main_comparison": {
+      "kde_bandwidth": 0.35,
+      "lof_n_neighbors": 20,
+      "rationale": "在运行实验前由数据生成参数（Silverman 参考带宽 0.193/0.387）直接指定：h=0.35 接近稀疏簇参考带宽并处于网格中部；k=20 为网格中位。两者均未参考任何测试结果。",
+      "prohibited": "禁止用测试集 AUC/AP 最优的参数充当主比较默认参数"
+    },
+    "secondary": {
+      "report_full_curves": "所有 (h, k) 组合的完整指标曲线必须全部报告，主比较参数只是曲线上一个预先指定的点",
+      "val_likelihood_selection": "若补充『按 validation 平均对数似然选 h』，须标注为 P1 拓展，并与检测指标并列呈现，说明它优化的是密度估计目标而非检测目标"
+    }
+  },
+
+  "experiments": {
+    "E0_1d_demo": {
+      "fixed": ["一维双峰样本（seed 1704 / 1714）", "gaussian 核", "绘图网格 x in [-5, 5]，1001 点"],
+      "varied": "带宽 h ∈ {0.08, 0.30, 0.90}",
+      "output": "三条密度曲线；峰数、峰高、峰位表"
+    },
+    "E1_kde_sensitivity": {
+      "fixed": ["train/validation/test 划分", "测试异常比例 0.2 与异常构造", "gaussian 核", "阈值规则 inverted_cdf(0.99)"],
+      "varied": "带宽 h ∈ {0.10, 0.20, 0.35, 0.50, 0.80, 1.20}",
+      "output": "每个 h 的 AUC/AP/分簇FPR/召回率/阈值处混淆矩阵；val 平均对数似然"
+    },
+    "E2_lof_sensitivity": {
+      "fixed": ["train/validation/test 划分", "测试异常比例 0.2 与异常构造", "欧氏距离", "阈值规则 inverted_cdf(0.99)"],
+      "varied": "邻居数 k ∈ {10, 20, 35, 50}",
+      "output": "每个 k 的 AUC/AP/分簇FPR/召回率/阈值处混淆矩阵"
+    },
+    "E3_method_comparison": {
+      "fixed": ["完全相同的 train/validation/test 与异常标签", "参数按 parameter_selection_rule 固定为 h*=0.35, k*=20", "阈值规则一致"],
+      "varied": "检测器 KDE vs LOF",
+      "output": "两模型在默认操作点的 AUC/AP/P/R/F1/混淆矩阵/分簇FPR 并排表"
+    },
+    "E4_extensions_optional": {
+      "P1_multiseed": "repeat 1..10，种子偏移 10000*r；报告每个 repeat 的指标、均值与标准差",
+      "P1_near_anomaly": "启用 near 类型，按异常类型分层报告",
+      "P1_likelihood_vs_detection_bandwidth": "argmax_h 验证集平均对数似然 vs argmax_h 测试 AUC/AP（后者只作事后描述，不做选择）",
+      "P2_polluted_train": "训练集混入污染样本，污染率作为唯一改变变量",
+      "P2_dimension_or_density_ratio": "只改变维数或簇 sd 比中的一项",
+      "P2_public_benchmark": "公开数据复核，不能替代主实验控制变量分析"
+    }
+  },
+
+  "hypotheses": {
+    "H1": {
+      "statement": "固定训练样本时，增大 KDE 带宽会使估计密度更平滑；h 过小时曲线更局部且方差更高，h 过大时双峰结构被抹平。",
+      "observables": ["1D 三带宽曲线的峰数与峰高", "2D 密度曲面在簇心与簇间谷的取值", "validation 平均对数似然随 h 的变化"],
+      "falsified_if": "在某一 h 区间内增大 h 反而使曲线峰数增加或局部方差上升，且无法用数值误差或网格分辨率解释。"
+    },
+    "H2": {
+      "statement": "正常簇密度不同时，单一全局密度阈值会把稀疏正常簇的尾部误报为异常。",
+      "observables": ["fpr_sparse_cluster 与 fpr_dense_cluster 的差", "两簇正常样本异常分数的分布与 99% 阈值位置"],
+      "falsified_if": "在全部 h 上稀疏簇误报率不高于密集簇误报率，或两者差异落在多种子波动范围内。"
+    },
+    "H3": {
+      "statement": "局部密度比较有机会降低密度异质性带来的误报，但 LOF 对 k 和异常的局部结构敏感，不预设它整体优于 KDE。",
+      "observables": ["相同目标 FPR 下 KDE 与 LOF 的 recall/AP 差", "分簇 FPR 差", "随 k 与 h 的变化趋势"],
+      "falsified_if": "LOF 在全部 k、全部异常类型上都一致优于（或一致劣于）KDE 且差距超出种子波动，则『有条件优势但不整体更优』退化为单调优劣关系。"
+    },
+    "H4": {
+      "statement": "以正常数据似然选出的带宽与异常检测指标最优带宽可能不同。",
+      "observables": ["argmax_h validation 平均对数似然", "argmax_h 测试 AUC 与 argmax_h 测试 AP"],
+      "falsified_if": "在所有种子与重复上两组 argmax 完全一致。"
+    }
+  },
+
+  "leakage_controls": [
+    {"id": "L1", "rule": "train 只含正常样本；任何模型只在 train 上 fit", "check": "断言 train 标签全为 0"},
+    {"id": "L2", "rule": "validation 只含正常样本，只用于阈值校准", "check": "断言 validation 标签全为 0"},
+    {"id": "L3", "rule": "阈值只由 validation 正常分数计算", "check": "代码路径审查 + 断言阈值来源数组长度 = 1000"},
+    {"id": "L4", "rule": "测试标签不参与带宽、k、阈值或任何选择", "check": "参数网格来自 config，测试标签只在指标计算函数体内出现"},
+    {"id": "L5", "rule": "数据变换只在 train 上 fit（本协议不做变换）", "check": "断言 preprocessing.scaling == none"},
+    {"id": "L6", "rule": "三个 split 之间无样本重用", "check": "断言三份数据的行哈希互不相同，且不存在逐点重合"},
+    {"id": "L7", "rule": "运行顺序固定：先锁定协议与网格，再跑测试", "check": "protocol_version 在结果文件生成前已写入并打印到 run_log"}
+  ]
+}
