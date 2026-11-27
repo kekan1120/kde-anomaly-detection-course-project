@@ -32,7 +32,7 @@
 |---|---|---|---|
 | A | B | 数据生成协议、划分、参数网格、指标定义 | ✅（A 已交叉核对 `config_ref.json`） |
 | B | C | 实现与复现、分数方向、种子与运行日志 | ✅（B 的审计脚本已审 C，12 项 PASS） |
-| C | D | 图表、结论与数值、论文整合 | ⬜ 待 D 产出后执行 |
+| C | D | 图表、结论与数值、论文整合 | ✅（2026-11-27 完成两轮复核：`06_paper/c_review_of_D.md` + 脚本 `04_code/review_D_numbers.py` 34 项全 PASS；提出 7 条修改并逐条复验关闭；数值层 0 错误、0 跨版本混用） |
 | D | A | 理论与公式、文献引用、问题与假设 | ⬜ 待 D 确认 |
 
 ### 2.3 四人确认
@@ -56,7 +56,8 @@
 | 数据划分 / 参数网格 / 指标定义 | `04_code/config_ref.json`（**B-v1.1-near**；v1.0 冻结于 tag `v1.0-results-frozen`） | ☑ | ☑ | ☑ | ☑ |
 | H1/H4 合并为「带宽敏感性」主线 | [decision-log.md](decision-log.md) #14 | ☑ | ☑ | ☑ | ☑ |
 
-> 注：C 已在 `05_results/main/sanity_checks.md` 中对符号方向与阈值口径做 15 项核验（全 PASS），可作 C 确认的证据。
+> 注：C 已在 `05_results/main/sanity_checks.md` 中对符号方向与阈值口径做 15 项核验（全 PASS），
+> v1.1 分层补充另有 17 项核验（含 C17 不变性、C18 点级嵌套）；13 项结果审计与 12 项交叉审计均 PASS，可作 C 确认的证据。
 
 ### B 的核对备注（2026-11-27）
 
@@ -81,7 +82,7 @@ B 已逐项读完 `research-questions-hypotheses.md`、`glossary.md` 与 `04_cod
 |---|---|---|---|
 | A | [member_A.md](../process-logs/member_A.md) | session-d74f302b-694c-4833-9469-70713f36e171 | 已建，链接已填 |
 | B | [member_B.md](../process-logs/member_B.md) | 待填 | **模板已建，待本人填真实回合** |
-| C | [member_C.md](../process-logs/member_C.md) | 待填 | 已建，待补链接 |
+| C | [member_C.md](../process-logs/member_C.md) | https://github.com/kekan1120/kde-anomaly-detection-course-project/blob/main/process-logs/member_C_session_export.md | **已建，链接已填**（客户端 `/export` 导出的原始会话全文转写） |
 | D | [member_D.md](../process-logs/member_D.md) | https://chat.deepseek.com/share/finjt1j2r3rl7znvqf | **链接与真实回合已填** |
 
 > 记录必须是本人账号下同一连续会话的真实交互；不得虚构提示词、模型错误或核验结果。

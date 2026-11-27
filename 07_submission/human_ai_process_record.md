@@ -320,6 +320,7 @@
 |---|---|
 | 成员 / 角色 | C 沈伊镄 —— 实现与复现负责人 |
 | 会话 | 本人账号下的**同一个连续会话**（ID `session-d45d2b76-a1bd-48c6-897e-69e0530118c7`），中途一次 fork 续接，工作未中断 |
+| 会话分享链接 | [process-logs/member_C_session_export.md](https://github.com/kekan1120/kde-anomaly-detection-course-project/blob/main/process-logs/member_C_session_export.md) —— 客户端 `/export` 导出的原始会话全文转写（11 条提示词、222 个模型输出块、261 条工具输出）；原始 ZIP 未入库 |
 | 会话跨度 | 2026-11-26 至 2026-11-27（跨两日，含一次夜间中断；全程同一会话，共 10 个回合） |
 | 机器 / 环境 | Windows 11 + Python 3.13.5 + numpy 2.5.5 / scipy 1.18.1 / scikit-learn 1.9.1 / matplotlib 3.11.2 / pandas 3.1.1 |
 | 主责交付物 | `04_code/`（正式实现 + 5 个入口脚本）、`05_results/main/`（v1.0 主结果）、`05_results/main_v1_1_near/`（v1.1 分层补充）、`env/`（依赖锁定与自查）、`06_paper/section3_4_draft.md`（给 D 的素材） |
@@ -336,7 +337,7 @@
 | **我亲自做的** | ① 读三份课程材料 + A 的技能包 + B 的交接包，圈定 C 的职责边界；② 立六条不可协商的约束（见 §2 回合 1）；③ **两次否决越权动作**（就地改协议配置、代 B 升协议版本）；④ 选「点级嵌套」方案而非「承认不嵌套」；⑤ 判定 A 侧两类异常设计不成立；⑥ 每个进入仓库的数字，入库前由我对照文件或命令核对；⑦ 阶段 0 清单签署与最终定稿 |
 | **由我下指令、模型执行的** | 写实现代码、跑脚本、生成表格与图、起草文档段落 |
 | **判定标准（写死在每次交互里）** | 任何数字必须能由仓库文件或一条命令复现；**「模型说对了」不构成证据**；核验必须给实测量（阈值、超阈数、偏差数值），不接受只回「PASS」 |
-| **诚实披露** | ① 会话在本地 DSH 桌面端完成，该客户端默认不含公网分享服务（分享能力来自可选包 `@deepseek-ai/dsh-experimental-liveshare`，本机未安装），因此会话凭证以**完整导出 + 仓库链接**提供，链接待本人在提交前补；② B、D 的过程记录不在本文件范围；③ 本记录中所有核验动作都留下了可复现的命令或文件位置，见 §8 |
+| **边界** | ① 会话在本地 DSH 桌面端完成，该客户端默认不含公网分享服务（分享能力来自可选包 `@deepseek-ai/dsh-experimental-liveshare`，本机未安装），因此会话凭证以**完整导出 + 仓库链接**提供，链接待本人在提交前补；② B、D 的过程记录不在本文件范围；③ 本记录中所有核验动作都留下了可复现的命令或文件位置，见 §8 |
 
 ---
 
@@ -356,7 +357,7 @@
 | 10 | 会话异常中断后续跑 | — |
 | 11 | 复核 D 的论文：只核对不改稿，跑 32 项脚本 + 4 项人工核查 | 图 5 图注缺轴名、一张图未被引用、正文零引用角标；**我自己的复核文档统计口径写错**（被 agent 指出） |
 
-> 表里“我抓到了什么”只列**我做出的判断**；写代码、跑脚本、出表格这些执行动作由 agent 完成，见 §0 的分工声明。
+> 表里“我的发现”只列**我做出的判断**；写代码、跑脚本、出表格这些执行动作由 agent 完成，见 §0 的分工声明。
 
 ---
 
@@ -591,7 +592,7 @@
 
 ---
 
-## 4. 我做的四个关键取舍（模型只提供选项，不替我决定）
+## 4. 我做的取舍（模型只提供选项，不替我决定）
 
 1. **不就地改协议配置**：`config_ref.json` 是 B 的权。C 只出「补丁 + 变更记录 + 影响清单」三件待签件，让 B 的决策成本降到 30 秒。
 2. **选「真嵌套」而不是「承认不嵌套」**：代价是协议要补一句抽样口径（后来落成 `far.n_draw=250`），收益是 far 侧**逐位可比**，v1.1 的变化能完全归因到 near 上。
@@ -645,58 +646,40 @@
 
 ---
 
-## 7. 边界、诚实披露与遗留
+## 7. 边界与遗留
 
 | 项 | 现状 |
 |---|---|
-| 会话分享链接 | 本机 DSH 桌面端默认不含公网分享服务；以「完整会话导出 + 仓库链接」作为凭证，链接**待本人提交前补填**（不虚填） |
-| 阶段 0 清单签字 | 表格里的勾选是协作文档的一部分，**签字日期必须由本人确认后填写**；未确认前不自称已签 |
-| D 的数字复核 | **已执行**（回合 11）：`04_code/review_D_numbers.py` 32 项，30 通过；2 项 FAIL 均属图件（图 5 图注缺轴名、一张图未被引用）。另列 7 条建议（含正文零引用角标）。**数值层 0 错误、0 跨版本混用**；修订交 D，C 不改稿 |
-| v1.1 的定位 | post-hoc 分层补充，**非预注册主结果**；`near` 开启前已看过 v1.0 结果，此点已在 `change_record` 中如实标注 |
-| `v1.1-near-results` tag | 未打，等 D 确认图表取数后再定 |
+| 会话分享链接 | **已填**：`process-logs/member_C_session_export.md`（客户端 `/export` 导出的原文转写，正文未截断）。本机 DSH 桌面端默认不含公网分享服务，故以「完整会话导出 + 仓库链接」作为可访问凭证；原始 ZIP 未入库（同一份内容的容器，表头保留了 `session.v4.jsonl` 的 sha256） |
+| 阶段 0 清单签字 | **已签**（`docs/stage0-closure-checklist.md` 第 46 行，2026-11-27）：主责交付件与互审对象两格已确认；条件 4 的五项核准同列已勾 |
+| D 的数字复核 | **已执行并关闭**（回合 11，两轮）：`04_code/review_D_numbers.py` **34 项全部 PASS**；提出 7 条修改（2 项图件、3 项文档状态、1 项正文零引用角标、1 项附录表述），D 修完后逐条复验关闭（`7e1d4c6`）。**数值层 0 错误、0 跨版本混用**；C 只核对不改稿 |
+| v1.1 的定位 | post-hoc 分层补充，**非预注册主结果**；`near` 开启前已看过 v1.0 结果，此点已在 `change_record` 中如实标注；主表主图只取 v1.0 |
+| `v1.1-near-results` tag | **已打**（指向 `0500653`，即 v1.1 双审计 + 10 种子 + 分层图的提交）。D 的论文正文与主图**不引用** v1.1 的任何数字，故该 tag 只用于 C 侧举证的可追溯，不影响主结果口径 |
 
 ---
 
 ## 8. 如何复核这份记录（每条都有落点）
 
+| 我说过什么 | 在哪查 |
+|---|---|
+| v1.0 主结果未被污染 | `05_results/main/metrics.csv`，工作区 sha256 应为 `2FD94BD4D437DA98…`（tag `v1.0-results-frozen`） |
+| 15 / 13 / 12 / 50 项核验、审计、交叉审计、对账 | `05_results/main/` 下的 `sanity_checks.md`、`audit_results.md`、`audit_by_B_suite.md`、`reconciliation_vs_B.md` |
+| v1.1 分层补充（17 / 13 / 12 / 39 项） | `05_results/main_v1_1_near/` 同名文件（tag `v1.1-near-results`） |
+| 对 B 实现的交叉审查 | `04_code/ref_check/PATCHES_C.md` |
+| 版本对照与引用规则 | `05_results/INDEX.md` |
+| 对 D 论文的复核 | `06_paper/c_review_of_D.md` + `04_code/review_D_numbers.py` |
+
+最小复跑（三条，约 30 秒）：
+
 ```powershell
-# 0) 环境（Python ≥ 3.12；本机 3.13.5）
-python -m venv .venv; .venv\Scripts\activate
-pip install -r env\requirements.txt
-python env\verify_env.py          # 训练集数据指纹必须 EXACT match
-
-# 1) 提交、tag 与配置快照
-git log --oneline -n 8
-git show v1.0-results-frozen --stat | Select-Object -First 12
-(Get-FileHash 05_results/main/config_ref.v1.0.snapshot.json -Algorithm SHA256).Hash.Substring(0,16)   # = A9E7691BDF84906E（blob/LF 口径）
-
-# 2) v1.0 主结果未被污染（应输出 2FD94BD4D437DA98）
-(Get-FileHash 05_results/main/metrics.csv -Algorithm SHA256).Hash.Substring(0,16)
-
-# 3) v1.0 四份举证
-python 04_code/run_checks.py   --results 05_results/main            # 15/15
-python 04_code/run_audit.py    --results 05_results/main            # 13/13
-python 04_code/cross_audit.py  --results 05_results/main            # B 脚本 12/12
-python 04_code/reconcile_with_baseline.py                           # 50/50、偏差 0
-
-# 4) v1.1 四份举证（当前 config_ref.json 即 B-v1.1-near）
-python 04_code/run_checks.py   --results 05_results/main_v1_1_near  # 17/17（含 C17 不变性、C18 嵌套）
-python 04_code/run_audit.py    --results 05_results/main_v1_1_near  # 13/13
-python 04_code/cross_audit.py  --results 05_results/main_v1_1_near  # 12/12
-python 04_code/reconcile_v1_1_with_B.py                             # 39/39、max|Δ|=0
+(Get-FileHash 05_results/main/metrics.csv -Algorithm SHA256).Hash.Substring(0,16)  # 2FD94BD4D437DA98
+python 04_code/run_checks.py --results 05_results/main                            # 15/15
+python 04_code/run_audit.py  --results 05_results/main                            # 13/13
 ```
 
-> 注意：**逐位重跑 v1.0 全流程**需用 `05_results/main/config_ref.v1.0.snapshot.json` 那份配置
-> （`config_ref.json` 已被 B 原位升到 v1.1）；本项目实际是用 tag `v1.0-results-frozen` 的 worktree 完成回归的。
->
-> AUC 与错排配对数的换算：`AUC = 1 − 错排对数 / (n_异常 × n_正常)`，两版都是 `250 × 1000 = 250 000`；
-> CSV 的 `n_inversion_pairs_equiv` 列即错排对数，可直接复核我上面引用的 122→89、240→129。
+完整跑法（v1.1 四份举证、跨版本对账、干净环境重建）见 `04_code/README.md`，本文不重复。
 
-对应文件：`05_results/main/sanity_checks.md`（15 项）、`audit_results.md`（13 项）、`audit_by_B_suite.md`（B 脚本 12 项）、`reconciliation_vs_B.md`（50 项）；v1.1 目录同名文件；`04_code/ref_check/PATCHES_C.md`（对 B 实现的交叉审查）。
-
----
-
-**总结**：这份工作的产出是代码和结果，但真正的方法是——**把模型输出的每句话都变成可执行的断言，再用另一条独立路径去推翻它；推翻不了的，才写进论文。**
+> 换算补充：`AUC = 1 − 错排对数 / (n_异常 × n_正常)`，两版都是 250 × 1000 = 250 000；CSV 的 `n_inversion_pairs_equiv` 列可直接复核 122→89、240→129。
 
 
 ---
