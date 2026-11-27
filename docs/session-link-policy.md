@@ -47,7 +47,7 @@ zstd -d "$sess" -o "$env:TEMP\session.jsonl"
 | 成员 | 平台 | 凭证 | 状态 |
 |---|---|---|---|
 | A 林辰旭 | DSH 桌面端 | `process-logs/member_A_session_export.md` | ✅ 已确认（decision-log #25） |
-| B 连昭悦 | **待确认** | **待填** | ⬜ 待补 |
+| B 连昭悦 | DSH 桌面端 | `process-logs/member_B_session_export.md` | ✅ 已补填（B 本人 2026-11-27） |
 | C 沈伊镄 | DSH 桌面端 | `process-logs/member_C_session_export.md` | ✅ 已确认（decision-log #25） |
 | D 陈永喆 | DeepSeek | `https://chat.deepseek.com/share/finjt1j2r3rl7znvqf` | ✅ 原生分享链接 |
 
@@ -63,4 +63,5 @@ zstd -d "$sess" -o "$env:TEMP\session.jsonl"
 - decision-log #25：A、C 的 DSH 导出凭证确认为等价凭证
 - `process-logs/member_A_session_export.md`（2605 条原始记录 / 40 提示词 / 148 回复）
 - `process-logs/member_C_session_export.md`（C 的 `/export` 原文）
+- `process-logs/member_B_session_export.md`（15548 条原始记录 / 17 提示词 / 117 回复，由本机 DSH 原始档 `zstd -d` 解压后按 §2 方法生成）
 - 阶段 0 关闭检查清单条件 5
