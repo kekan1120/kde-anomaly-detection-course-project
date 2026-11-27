@@ -338,47 +338,29 @@
 | 阶段 0 清单签字 | **已签**（`docs/stage0-closure-checklist.md` 第 46 行，2026-11-27）：主责交付件与互审对象两格已确认；条件 4 的五项核准同列已勾 |
 | D 的数字复核 | **已执行并关闭**（回合 11，两轮）：`04_code/review_D_numbers.py` **34 项全部 PASS**；提出 7 条修改（2 项图件、3 项文档状态、1 项正文零引用角标、1 项附录表述），D 修完后逐条复验关闭（`7e1d4c6`）。**数值层 0 错误、0 跨版本混用**；C 只核对不改稿 |
 | v1.1 的定位 | post-hoc 分层补充，**非预注册主结果**；`near` 开启前已看过 v1.0 结果，此点已在 `change_record` 中如实标注；主表主图只取 v1.0 |
-| `v1.1-near-results` tag | 未打，等 D 确认图表取数后再定 |
+| `v1.1-near-results` tag | **已打**（指向 `0500653`，即 v1.1 双审计 + 10 种子 + 分层图的提交）。D 的论文正文与主图**不引用** v1.1 的任何数字，故该 tag 只用于 C 侧举证的可追溯，不影响主结果口径 |
 
 ---
 
 ## 8. 如何复核这份记录（每条都有落点）
 
+| 我说过什么 | 在哪查 |
+|---|---|
+| v1.0 主结果未被污染 | `05_results/main/metrics.csv`，工作区 sha256 应为 `2FD94BD4D437DA98…`（tag `v1.0-results-frozen`） |
+| 15 / 13 / 12 / 50 项核验、审计、交叉审计、对账 | `05_results/main/` 下的 `sanity_checks.md`、`audit_results.md`、`audit_by_B_suite.md`、`reconciliation_vs_B.md` |
+| v1.1 分层补充（17 / 13 / 12 / 39 项） | `05_results/main_v1_1_near/` 同名文件（tag `v1.1-near-results`） |
+| 对 B 实现的交叉审查 | `04_code/ref_check/PATCHES_C.md` |
+| 版本对照与引用规则 | `05_results/INDEX.md` |
+| 对 D 论文的复核 | `06_paper/c_review_of_D.md` + `04_code/review_D_numbers.py` |
+
+最小复跑（三条，约 30 秒）：
+
 ```powershell
-# 0) 环境（Python ≥ 3.12；本机 3.13.5）
-python -m venv .venv; .venv\Scripts\activate
-pip install -r env\requirements.txt
-python env\verify_env.py          # 训练集数据指纹必须 EXACT match
-
-# 1) 提交、tag 与配置快照
-git log --oneline -n 8
-git show v1.0-results-frozen --stat | Select-Object -First 12
-(Get-FileHash 05_results/main/config_ref.v1.0.snapshot.json -Algorithm SHA256).Hash.Substring(0,16)   # = A9E7691BDF84906E（blob/LF 口径）
-
-# 2) v1.0 主结果未被污染（应输出 2FD94BD4D437DA98）
-(Get-FileHash 05_results/main/metrics.csv -Algorithm SHA256).Hash.Substring(0,16)
-
-# 3) v1.0 四份举证
-python 04_code/run_checks.py   --results 05_results/main            # 15/15
-python 04_code/run_audit.py    --results 05_results/main            # 13/13
-python 04_code/cross_audit.py  --results 05_results/main            # B 脚本 12/12
-python 04_code/reconcile_with_baseline.py                           # 50/50、偏差 0
-
-# 4) v1.1 四份举证（当前 config_ref.json 即 B-v1.1-near）
-python 04_code/run_checks.py   --results 05_results/main_v1_1_near  # 17/17（含 C17 不变性、C18 嵌套）
-python 04_code/run_audit.py    --results 05_results/main_v1_1_near  # 13/13
-python 04_code/cross_audit.py  --results 05_results/main_v1_1_near  # 12/12
-python 04_code/reconcile_v1_1_with_B.py                             # 39/39、max|Δ|=0
+(Get-FileHash 05_results/main/metrics.csv -Algorithm SHA256).Hash.Substring(0,16)  # 2FD94BD4D437DA98
+python 04_code/run_checks.py --results 05_results/main                            # 15/15
+python 04_code/run_audit.py  --results 05_results/main                            # 13/13
 ```
 
-> 注意：**逐位重跑 v1.0 全流程**需用 `05_results/main/config_ref.v1.0.snapshot.json` 那份配置
-> （`config_ref.json` 已被 B 原位升到 v1.1）；本项目实际是用 tag `v1.0-results-frozen` 的 worktree 完成回归的。
->
-> AUC 与错排配对数的换算：`AUC = 1 − 错排对数 / (n_异常 × n_正常)`，两版都是 `250 × 1000 = 250 000`；
-> CSV 的 `n_inversion_pairs_equiv` 列即错排对数，可直接复核我上面引用的 122→89、240→129。
+完整跑法（v1.1 四份举证、跨版本对账、干净环境重建）见 `04_code/README.md`，本文不重复。
 
-对应文件：`05_results/main/sanity_checks.md`（15 项）、`audit_results.md`（13 项）、`audit_by_B_suite.md`（B 脚本 12 项）、`reconciliation_vs_B.md`（50 项）；v1.1 目录同名文件；`04_code/ref_check/PATCHES_C.md`（对 B 实现的交叉审查）。
-
----
-
-**总结**：这份工作的产出是代码和结果，但真正的方法是——**把模型输出的每句话都变成可执行的断言，再用另一条独立路径去推翻它；推翻不了的，才写进论文。**
+> 换算补充：`AUC = 1 − 错排对数 / (n_异常 × n_正常)`，两版都是 250 × 1000 = 250 000；CSV 的 `n_inversion_pairs_equiv` 列可直接复核 122→89、240→129。
