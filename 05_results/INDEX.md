@@ -11,6 +11,14 @@
 | `B-v1.0-locked` | `04_code/config_ref.json` | `05_results/main/` | `7f4990c`（tag `v1.0-results-frozen`） | **冻结 / 预注册主结果** | §4 主表、主图（E0/E1/E2/E3）、技术路线与局限 |
 | `B-v1.0-locked`（参考实现） | 同上 | `05_results/ref_check/` | `7f4990c` | 对账基准（见 §4 说明） | §3.4 可复现性举证、附录对账 |
 | ~~`B-v1.1-near`~~ | **无**：仅 `04_code/patches/config_patch_near.json`（待 B 签署） | **无**：B 签署前不得产出任何正式结果 | — | **未授权 / 待签** | 无 |
+| `B-v1.1-near`（参考实现） | `04_code/config_ref.json`（当前值） | `05_results/ref_check_v1.1/` | `442d9e6` | **B 已签署 2026-11-27**；属 post-hoc 修订，v1.0 仍为预注册主结果 | **不是论文主结果**；仅作 `anomaly_type` 分层补充，以及 C17 不变性契约 / C18 点级嵌套的举证 |
+
+> **2026-11-27 更新（B）**：上表第 3 行的「未授权 / 待签」是签署前的历史记录，保留不动。
+> B 已于 2026-11-27 签署并落地 `B-v1.1-near`，字段差异见 `04_code/config_ref.json`、
+> 变更行见 `01_protocol_and_data_dictionary.md` §12，签署结论见 `04_code/patches/` 三件。
+> 新增第 4 行只为登记 **B 参考实现** 在 v1.1 下的结果；**C 的正式 v1.1 结果** 仍应由 C 跑出后
+> 以 `05_results/main/` 的新目录另立一行（本表由 C 维护）。
+
 
 **v1.1 的状态（重要）**：协议版本权归 B，`config_ref.json` 的 disclaimer 禁止同版本改字段。
 因此仓库内**不存在** `config_v1_1_near.json`，也**不会**有条目名为 `main_v1_1_near/` 的正式结果目录。
