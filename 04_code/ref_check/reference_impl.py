@@ -125,12 +125,20 @@ def sample_far_anomalies(cfg: dict, n: int, repeat: int = 0) -> np.ndarray:
 
     用参数化构造（theta, r 两次独立 uniform）而不是在方框里做拒绝采样，
     因为拒绝采样的循环次数会影响后续随机数消耗，跨实现无法保证逐位一致。
+
+    **B-v1.1-near 的点级嵌套口径（协议 §3.1，Q-A 裁定取 C 的 B 案）**：实际抽样量恒为
+    ``far.n_draw``（250），再取前 ``n`` 行。随机数消耗因此与 ``n_test`` 解耦，任何
+    ``n_test <= n_draw`` 的配置都得到 B-v1.0 那 250 个远端异常点的前 ``n_test`` 个，
+    使 far 侧判定在版本之间逐位可比。``n_draw`` 缺省时退化为 ``n``（即 B-v1.0 行为不变）。
     """
     spec = cfg["anomaly"]["types"]["far"]
+    n_draw = int(spec.get("n_draw", spec["n_test"]))
+    assert n <= n_draw, f"n_test={n} 超过 far.n_draw={n_draw}，嵌套口径不成立"
     rng = make_rng(cfg, "test.anomaly.far", repeat)
-    theta = rng.uniform(0.0, 2.0 * np.pi, n)
-    r = rng.uniform(float(spec["r_min"]), float(spec["r_max"]), n)
-    return np.column_stack([r * np.cos(theta), r * np.sin(theta)])
+    theta = rng.uniform(0.0, 2.0 * np.pi, n_draw)
+    r = rng.uniform(float(spec["r_min"]), float(spec["r_max"]), n_draw)
+    X = np.column_stack([r * np.cos(theta), r * np.sin(theta)])
+    return X[:n]
 
 
 def sample_near_anomalies(cfg: dict, n: int, repeat: int = 0) -> np.ndarray:

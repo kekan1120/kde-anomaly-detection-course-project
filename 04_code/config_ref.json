@@ -1,6 +1,6 @@
 {
-  "protocol_version": "B-v1.0-locked",
-  "protocol_locked_utc": "TBD-by-team",
+  "protocol_version": "B-v1.1-near",
+  "protocol_locked_utc": "2026-11-27",
   "owner": "B 数据与实验设计负责人",
   "consumers": ["C 实现与复现负责人", "D 分析与论文整合负责人", "A 组长兼理论负责人"],
   "spec_document": "01_protocol_and_data_dictionary.md",
@@ -89,11 +89,13 @@
         "r_max": 7.0,
         "min_distance_to_nearest_cluster_center": 3.0,
         "min_distance_derivation": "环上距原点最近点 r=5 落在 (±5,0)；与最近簇中心 (±2,0) 的距离为 5-2=3。稀疏簇 sd=1.0，故最近处仍为 3σ。",
-        "n_test": 250,
+        "n_test": 125,
+        "n_draw": 250,
+        "sampling_note": "抽样口径（B-v1.1-near，Q-A 裁定取 C 的 B 案）：先按固定的 n_draw 生成 theta~U(0,2pi,n_draw) 与 r~U(5,7,n_draw)，再取前 n_test 行。n_draw 恒为 250、不随 n_test 变化，因此任何 n_test<=250 的配置都得到 v1.0 那 250 个远端异常点的前 n_test 个（点级嵌套），随机数消耗与 n_test 无关，far 侧判定在版本之间逐位可比。",
         "role": "核心情形（任务书要求『至少包含远端异常』）"
       },
       "near": {
-        "enabled": false,
+        "enabled": true,
         "type_id": "compact_void",
         "construction": "compact_gaussian",
         "seed_key": "test.anomaly.near",
@@ -101,10 +103,10 @@
         "center": [0.0, 5.0],
         "cov_diag": [0.1225, 0.1225],
         "fixed_scale": 0.35,
-        "n_test": 0,
+        "n_test": 125,
         "role": "可选拓展 P1（局部/边界异常）。启用时须把 near.n_test 设为 125、far.n_test 改为 125，使二者之和仍为 250 且测试异常比例保持 20%；主结果须按 anomaly_type 分层报告。",
         "label_rule": "标签恒为 1，由生成位置决定，不由任何检测器输出决定。",
-        "design_note": "这是「空区中的紧凑小簇」：离两个正常簇都很远（绝对密度极低，KDE 必然判为异常），但内部点彼此很近（局部密度高，LOF 会判为正常）。它不是球壳式边界异常。",
+        "design_note": "空区中的紧凑小簇：离两个正常簇都很远，但内部点彼此很近。注意：本协议强制 LOF 使用 novelty=True（只在训练正常样本上拟合），此时新点的局部可达密度相对训练集计算，离训练集很远就一定很低，因此 KDE 与 LOF 都会判它异常（设计阶段探针实测判异率均 100%，见 04_code/ref_check/probe_hard_cases.py 与协议 §3.2.1）。故本类型仅作 anomaly_type 分层补充，不构成 KDE/LOF 方法差异的判别点。",
         "why_not_a_shell": "以稀疏簇为参照的 2.5σ 球壳在几何上不成立：稀疏簇 sd=1.0，二维标准高斯 P(r>=2.5)=exp(-3.125)=4.39%，即 500 个正常稀疏簇点里约有 22 个落在球壳之外。这些正常点密度更低、异常分数比被标注为异常的球壳点还高，标签体系自相矛盾，任何检测器都无法在该子集上取得合理召回。要消除矛盾需 r>=4.0σ，但 r=4 处已与远端异常环重叠，不再构成独立的「局部」类型。故改用空区紧凑簇。"
       }
     }
@@ -163,10 +165,10 @@
       "score_direction": "越大越异常",
       "grid_justification": {
         "method": "Silverman 经验带宽 h_ref = sigma * n_c^(-1/(d+4))，d=2 故指数为 -1/6，n_c=300 时 n_c^(-1/6)=0.3866",
-        "dense_cluster_h_ref": 0.193,
-        "sparse_cluster_h_ref": 0.387,
-        "pooled_mixture_h_ref": 0.831,
-        "pooled_derivation": "E[X^2]=0.5*(0.25+4)+0.5*(1+4)=4.625，Var=4.625，sd=2.1506，h_ref=2.1506*0.3866=0.831",
+        "dense_cluster_h_ref": 0.1932,
+        "sparse_cluster_h_ref": 0.3865,
+        "pooled_mixture_h_ref": 0.8312,
+        "pooled_derivation": "E[X^2]=0.5*(0.25+4)+0.5*(1+4)=4.625，Var=4.625，sd=2.1506，h_ref=2.1506*0.386497=0.8312（因子 300^(-1/6)=0.386497）",
         "coverage": "网格覆盖密集簇参考带宽的 0.52x 到 6.2x，覆盖混合数据经验带宽 0.83x 到 1.44x",
         "deviation_from_plan_pdf": "在规划 PDF 建议的 {0.2, 0.35, 0.5, 0.8, 1.2} 上增加 h=0.10。原因：原网格最小值 0.20 已接近密集簇参考带宽 0.193，缺少『明显偏小、曲线崎岖』的一端，H1 的欠平滑侧无观测点。此项调整在运行任何实验之前完成，依据仅为数据生成参数（先验已知），与测试表现无关。"
       }

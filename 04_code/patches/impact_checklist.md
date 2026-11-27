@@ -60,7 +60,22 @@
 4. 新版本标为 post-hoc，与 v1.0（预注册主结果）并列报告；变更前已看过 v1.0 测试结果，
    `test_results_seen_before_change = true`。
 
-## 6. 决策权归属
+## 6. B 的签署结论（2026-11-27）
+
+**已签署，落地为 `B-v1.1-near`。** 实测已核对本清单§2 的全部不变量：
+
+- `train` / `validation` 的 sha256、`test` 的 500+500 正常侧、全部 10 个阈值、
+  `val_mean_log_likelihood`、`fp_dense`/`fp_sparse`/`fpr_dense`/`fpr_sparse`/`fpr_overall`/`fp`/`tn`、
+  E0 峰结构表、结果表列集合与列序 —— **均逐位不变**（max|Δ| = 0.0e+00）。
+- 变化的只有异常侧：`n_anomaly_far` 250→125、`n_anomaly_compact_void` 0→125、
+  `tp`/`fn`/`recall`/`precision`/`f1`/`roc_auc`/`average_precision`/`n_inversion_pairs_equiv`。
+- Q-A 取 B 案已验证成立：v1.0 的 250 个 far 点前 125 个 == v1.1 的 125 个（逐位）。
+- §5.3 的预估已被实测印证：AUC 确实机械上升（KDE h*=0.35：0.999512→0.999644），
+  与检测变好无关，因此**不得跳版本比较 AUC/AP**。
+- `recall_compact_void` 在全部 10 个配置上均为 **1.0000（125/125）**，印证它是
+  整团同分同进同出的块状量，**不构成 KDE/LOF 方法差异**。
+
+## 7. 决策权归属
 
 | 事项 | 归属 |
 |---|---|
