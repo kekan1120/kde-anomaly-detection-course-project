@@ -1,6 +1,6 @@
 # 项目状态
 
-- 状态：**阶段2 完成，阶段3 进行中**（阶段0 剩「全组核准」与「记录链接」两项）
+- 状态：**阶段2 完成；阶段3 结果已冻结（far-only v1.0）；near 待 B-v1.1**
 - 更新日期：2026-11-27
 - 选题：核密度估计与基于密度的异常检测
 - 分支：实验分支
@@ -20,10 +20,10 @@
 | 项目目录和本地Git | 已完成 | `main` 已关联 GitHub 远程分支 |
 | GitHub所有者与公开仓库名 | 已完成 | `kekan1120/kde-anomaly-detection-course-project`，Public |
 | 四名成员姓名与组长 | 已登记 | 组长由 A 担任，名单见项目章程 |
-| 课程截止日期 | 已确认 | 2026-12-01 23:41（截图推算），剩余约 5.4 天 |
+| 课程截止日期 | 已确认 | 2026-12-01 23:41（截图推算），剩余约 4.5 天 |
 | 最终文件提交格式 | 已确认 | 两份文件（超星截图口径） |
 | 研究问题与假设可证伪化 | 已起草 | A 完成 `docs/research-questions-hypotheses.md`，待全组核准 |
-| 四名成员个人会话记录 | 记录文件齐备 | 4 份均已建（A/C 有实质内容，B/D 为待填模板），会话链接待补 |
+| 四名成员个人会话记录 | 1/4 链接已填 | 4 份文件已建；A 链接已填，B/C/D 待补 |
 | 阶段0关闭检查清单 | 已建立 | `docs/stage0-closure-checklist.md`：6 条退出条件 + 四人确认/核准表 |
 | 阶段0章程核准 | 进行中 | 待 B/C/D 在检查清单打勾确认后关闭 |
 
@@ -51,5 +51,17 @@
 | 干净环境重跑（新建 venv + 独立输出目录） | 一致 | 指纹 sha256 一致，指标最大偏差 0.0 |
 | 交叉审查 B 的参考实现 | 发现并修正 1 处缺陷 | `04_code/ref_check/PATCHES_C.md` |
 | 个人 AI 过程记录 | 已建立 | `process-logs/member_C.md` |
-| 空区紧凑簇 `anomaly.near` 启用 | **待 B 升协议版本**（A 已按 #15 决定启用） | 版本权归 B；C 已交三件待签件 `04_code/patches/`（配置补丁 + §12 行草稿 + 影响清单）。B 签署前不产出任何正式结果，也不新建 v1.x 配置 |
+| 空区紧凑簇 `anomaly.near` 启用 | 待 **B 发布 B-v1.1**（A 已按 #15 决定启用） | 提案：`docs/protocol-change-B-v1.1.md`；C 已交三件待签件 `04_code/patches/`（配置补丁 + §12 行草稿 + 影响清单）；B 签署前不产出正式结果、不新建 v1.x 配置 |
 | 待办：本机会话分享链接 | 待本人填写 | `process-logs/member_C.md` 表头 |
+
+## 最新进展（2026-11-27）
+
+| 事项 | 状态 | 文件 |
+|---|---|---|
+| 目录统一 | 完成 | A 侧草稿统一到 `04_code/ai_draft/`、`05_results/ai_draft/`，与 C 正式实现物理隔离 |
+| 结果冻结口径 | 完成 | 主结果 **far-only（v1.0，冻结于 `7f4990c`）**；near 待 v1.1 |
+| A 侧草稿降级 | 完成 | boundary / compact@(0,0) 经 C 证伪，作「设计迭代记录」（`docs/experiment-protocol.md` §10） |
+| B-v1.1 变更提案 | 已起草，待 B 签署 | `docs/protocol-change-B-v1.1.md`（near.enabled=true、n_test 125/125） |
+| 论文引用口径 | 已建立，待 D 使用 | `docs/paper-citation-guide.md`（禁止引用 near / ai_draft 数字） |
+| 阶段0关闭包 | 已建立，待 B/C/D 签字 | `docs/stage0-closure-checklist.md` |
+| A 会话链接 | 已填 | `process-logs/member_A.md` |
