@@ -42,7 +42,7 @@
 | 成员 | 确认「我的任务/交付件无误」 | 确认「我的互审对象无误」 | 日期 |
 |---|---|---|---|
 | A 林辰旭 | ☑ | ☑ | 2026-11-27 |
-| B 连昭悦 | ☐ | ☐ | |
+| B 连昭悦 | ☑ | ☑ | 2026-11-27 |
 | C 沈伊镄 | ☐ | ☐ | |
 | D 陈永喆 | ☐ | ☐ | |
 
@@ -50,14 +50,31 @@
 
 | 核准项 | 依据文档 | A | B | C | D |
 |---|---|---|---|---|---|
-| Q1–Q3 研究问题无歧义、可操作化 | [research-questions-hypotheses.md](research-questions-hypotheses.md) §1 | ☑ | ☐ | ☐ | ☐ |
-| H1–H4 可观测变量与推翻判据 | 同上 §2 | ☑ | ☐ | ☐ | ☐ |
-| 符号、得分方向、阈值方向 | 同上 §3 + [glossary.md](glossary.md) | ☑ | ☐ | ☐ | ☐ |
-| 数据划分 / 参数网格 / 指标定义 | `04_code/config_ref.json`（B-v1.0 锁定） | ☑ | ☐ | ☐ | ☐ |
-| H1/H4 合并为「带宽敏感性」主线 | [decision-log.md](decision-log.md) #14 | ☑ | ☐ | ☐ | ☐ |
+| Q1–Q3 研究问题无歧义、可操作化 | [research-questions-hypotheses.md](research-questions-hypotheses.md) §1 | ☑ | ☑ | ☐ | ☐ |
+| H1–H4 可观测变量与推翻判据 | 同上 §2 | ☑ | ☑ | ☐ | ☐ |
+| 符号、得分方向、阈值方向 | 同上 §3 + [glossary.md](glossary.md) | ☑ | ☑ | ☐ | ☐ |
+| 数据划分 / 参数网格 / 指标定义 | `04_code/config_ref.json`（B-v1.0 锁定） | ☑ | ☑ | ☐ | ☐ |
+| H1/H4 合并为「带宽敏感性」主线 | [decision-log.md](decision-log.md) #14 | ☑ | ☑ | ☐ | ☐ |
 
 > 注：C 已在 `05_results/main/sanity_checks.md` 中对符号方向与阈值口径做 15 项核验（全 PASS），可作 C 确认的证据。
 
+### B 的核对备注（2026-11-27）
+
+B 已逐项读完 `research-questions-hypotheses.md`、`glossary.md` 与 `04_code/config_ref.json`，
+并与 `01_protocol_and_data_dictionary.md` §11 的「假设 → 观测量 → 推翻条件」逐条对齐。
+**核准通过**，另记两点建议澄清（不影响签署，请 A 在论文正文定稿时处理）：
+
+1. **H3 的「推翻判据」逻辑过强。** 现写「LOF 未降低密度异质性带来的误报，**或**整体检测表现不如 KDE」，是个 OR。
+   而 H3 的陈述是「**不预设** LOF 整体优于 KDE」，所以「LOF 整体指标略逊」本来就在预期之内，不应算推翻。
+   实测正落在这一情形：LOF 稀疏簇误报 **4/500 < KDE 11/500**（支持假设），
+   但 AUC **0.9990 < KDE 0.9995**（按现有 OR 判据会被误判为「推翻」）。
+   建议改为合取：「推翻判据：LOF 在稀疏正常簇误报率上不低于 KDE，**且**在其余指标上也无优势」。
+2. **术语表「阈值」条目建议补分位数实现方法。** 现只写「99% 经验分位数」。本协议锁定为
+   `numpy.quantile(scores_val, 0.99, method="inverted_cdf")`；若换成默认 `linear` 或 `higher`，
+   `n_val=1000` 时验证集超阈数不再是 10，阈值与全部下游指标会整体偏移
+   （见协议 §5 与 `04_code/src/kdelof/calibration.py` 的自查）。建议在该条目括注「实现方法见协议 §5」。
+
+---
 ## 四、条件 5：四份个人 AI 过程记录
 
 | 成员 | 文件 | 会话分享链接 | 状态 |
