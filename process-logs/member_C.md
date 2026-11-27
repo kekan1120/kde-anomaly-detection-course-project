@@ -4,7 +4,7 @@
 |---|---|
 | 成员 / 角色 | C 沈伊镄 —— 实现与复现负责人 |
 | 会话 | 本人账号下的**同一个连续会话**（ID `session-d45d2b76-a1bd-48c6-897e-69e0530118c7`），中途一次 fork 续接，工作未中断 |
-| 会话分享链接 | [process-logs/member_C_session_export.md](https://github.com/kekan1120/kde-anomaly-detection-course-project/blob/main/process-logs/member_C_session_export.md) —— 客户端 `/export` 导出的原始会话全文转写（11 条提示词、222 个模型输出块、261 条工具输出）；原始 ZIP 体积较大，未入库 |
+| 会话分享链接 | [process-logs/member_C_session_export.md](https://github.com/kekan1120/kde-anomaly-detection-course-project/blob/main/process-logs/member_C_session_export.md) —— 客户端 `/export` 导出的原始会话全文转写（11 条提示词、222 个模型输出块、261 条工具输出）；原始 ZIP 未入库 |
 | 会话跨度 | 2026-11-26 至 2026-11-27（跨两日，含一次夜间中断；全程同一会话，共 10 个回合） |
 | 机器 / 环境 | Windows 11 + Python 3.13.5 + numpy 2.5.5 / scipy 1.18.1 / scikit-learn 1.9.1 / matplotlib 3.11.2 / pandas 3.1.1 |
 | 主责交付物 | `04_code/`（正式实现 + 5 个入口脚本）、`05_results/main/`（v1.0 主结果）、`05_results/main_v1_1_near/`（v1.1 分层补充）、`env/`（依赖锁定与自查）、`06_paper/section3_4_draft.md`（给 D 的素材） |
