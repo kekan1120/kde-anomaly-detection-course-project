@@ -3,6 +3,9 @@
 KDE vs LOF 异常检测对照实验（第 1 题 · 实验分支）
 实现骨架由 AI 生成，须由 C（沈伊镄）人工核验并复现。
 
+v2 修正：异常改为「远端 + 边界」两类（y 收窄到正常范围），并分类型报告召回，
+        避免 v1 中「异常点 y 偏移过大 → 全部 AUROC=1.0、无区分度」的问题。
+
 依赖：numpy, pandas, scikit-learn, matplotlib
 运行：python run_experiment.py
 输出：results/metrics.csv、results/figures/*.png、results/run_log.txt
@@ -15,6 +18,8 @@ KDE vs LOF 异常检测对照实验（第 1 题 · 实验分支）
 """
 import json
 import os
+import platform
+import sys
 import time
 import numpy as np
 import pandas as pd
@@ -37,7 +42,7 @@ with open(os.path.join(HERE, "config.json"), encoding="utf-8") as f:
 # ---------------------------------------------------------------------------
 
 def make_two_clusters(n_per_cluster, seed):
-    """生成两个密度不同的正常二维高斯簇。返回 (X, cluster_id)。cluster: 0=密集, 1=稀疏。"""
+    """两个密度不同的正常二维高斯簇。返回 (X, cluster_id)：0=密集, 1=稀疏。"""
     rng = np.random.default_rng(seed)
     d = CFG["data"]
     dense = rng.multivariate_normal(d["dense_center"], d["dense_cov"] * np.eye(2), n_per_cluster)
@@ -48,17 +53,26 @@ def make_two_clusters(n_per_cluster, seed):
 
 
 def make_anomalies(n_anom, seed):
-    """生成远端异常：两簇外侧固定矩形区域均匀采样。返回 (X,)。"""
+    """生成远端(distal)与边界(boundary)两类异常。返回 (X, a_type)：0=distal, 1=boundary。"""
     rng = np.random.default_rng(seed)
-    boxes = CFG["data"]["anomaly_box"]  # [[xmin,xmax],[xmin,xmax]]
-    per = n_anom // len(boxes) + 1
-    parts = [rng.uniform(lo, hi, (per, 2)) for (lo, hi) in boxes]
-    X = np.vstack(parts)[:n_anom]
-    return X
+    spec = CFG["data"]["anomalies"]
+
+    def sample(box, n):
+        xs = rng.uniform(box["x"][0], box["x"][1], n)
+        ys = rng.uniform(box["y"][0], box["y"][1], n)
+        return np.column_stack([xs, ys])
+
+    n_distal = n_anom // 2
+    n_boundary = n_anom - n_distal
+    Xd = sample(spec["distal"], n_distal)
+    Xb = sample(spec["boundary"], n_boundary)
+    X = np.vstack([Xd, Xb])
+    a_type = np.array([0] * n_distal + [1] * n_boundary, dtype=int)
+    return X, a_type
 
 
 def make_data(train_seed, val_seed, test_seed):
-    """按协议生成 train / val / test。返回 (X_train, X_val, X_test, y_test, c_test)。"""
+    """生成 train/val/test。返回 (X_train, X_val, X_test, y_test, c_test, a_test)。"""
     d = CFG["data"]
     X_train, _ = make_two_clusters(d["n_per_cluster_train"], train_seed)
     X_val, _ = make_two_clusters(d["n_per_cluster_val"], val_seed)
@@ -67,12 +81,13 @@ def make_data(train_seed, val_seed, test_seed):
     n_normal = len(X_test_n)
     ratio = d["test_anomaly_ratio"]
     n_anom = int(round(n_normal * ratio / (1 - ratio)))
-    X_test_a = make_anomalies(n_anom, test_seed + 1000)
+    X_test_a, a_test_a = make_anomalies(n_anom, test_seed + 1000)
 
     X_test = np.vstack([X_test_n, X_test_a])
-    y_test = np.concatenate([np.zeros(n_normal), np.ones(n_anom)]).astype(int)  # 0 正常 1 异常
-    c_test = np.concatenate([c_test_n, -np.ones(n_anom, dtype=int)])  # -1 异常
-    return X_train, X_val, X_test, y_test, c_test
+    y_test = np.concatenate([np.zeros(n_normal), np.ones(n_anom)]).astype(int)
+    c_test = np.concatenate([c_test_n, -np.ones(n_anom, dtype=int)])
+    a_test = np.concatenate([-np.ones(n_normal, dtype=int), a_test_a])  # -1=正常
+    return X_train, X_val, X_test, y_test, c_test, a_test
 
 
 # ---------------------------------------------------------------------------
@@ -80,19 +95,16 @@ def make_data(train_seed, val_seed, test_seed):
 # ---------------------------------------------------------------------------
 
 def kde_scores(X_train, X_eval, h):
-    """KDE 异常分数：越大越异常。"""
     mdl = KernelDensity(kernel="gaussian", bandwidth=h).fit(X_train)
     return -mdl.score_samples(X_eval)
 
 
 def lof_scores(X_train, X_eval, k):
-    """LOF 异常分数（novelty 模式）：越大越异常。"""
     mdl = LocalOutlierFactor(n_neighbors=k, novelty=True).fit(X_train)
     return -mdl.score_samples(X_eval)
 
 
 def smoke_check(X_train):
-    """方向自检：明显远端点的得分应高于训练正常点。"""
     far = np.array([[100.0, 100.0]])
     s_kde_norm = kde_scores(X_train, X_train[:1], 0.5)[0]
     s_kde_far = kde_scores(X_train, far, 0.5)[0]
@@ -122,16 +134,24 @@ def evaluate(scores, y_test, threshold=None):
 
 
 def cluster_fpr(scores, y_test, c_test, threshold):
-    """分簇正常误报率：0=密集簇 1=稀疏簇。"""
     pred = (scores > threshold).astype(int)
     res = {}
     for cid, name in [(0, "dense"), (1, "sparse")]:
-        mask = (c_test == cid)  # 仅正常样本（异常 c=-1 已被排除）
+        mask = (c_test == cid)
         res[f"fpr_{name}"] = float(pred[mask].mean()) if mask.any() else np.nan
     return res
 
 
-def run_detector(name, X_train, X_val, X_test, y_test, c_test):
+def type_recall(scores, y_test, a_test, threshold):
+    pred = (scores > threshold).astype(int)
+    res = {}
+    for t, name in [(0, "distal"), (1, "boundary")]:
+        mask = (a_test == t)
+        res[f"recall_{name}"] = float(pred[mask].mean()) if mask.any() else np.nan
+    return res
+
+
+def run_detector(name, X_train, X_val, X_test, y_test, c_test, a_test):
     q = CFG["threshold"]["quantile"]
     grid = CFG["params"]["kde_bandwidths"] if name == "kde" else CFG["params"]["lof_neighbors"]
     rows = []
@@ -146,22 +166,19 @@ def run_detector(name, X_train, X_val, X_test, y_test, c_test):
         row = {"detector": name, "param": p, "threshold": thr}
         row.update(evaluate(s_test, y_test, thr))
         row.update(cluster_fpr(s_test, y_test, c_test, thr))
+        row.update(type_recall(s_test, y_test, a_test, thr))
         rows.append(row)
     return rows
 
 
 # ---------------------------------------------------------------------------
-# 1D 带宽示意（原理图，不并入二维指标）
+# 1D 带宽示意
 # ---------------------------------------------------------------------------
 
 def id_bandwidth_demo():
-    try:
-        import matplotlib
-        matplotlib.use("Agg")
-        import matplotlib.pyplot as plt
-    except ImportError:
-        print("[skip] matplotlib 未安装，跳过绘图")
-        return
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
     rng = np.random.default_rng(CFG["seeds"]["train"])
     X = np.concatenate([rng.normal(-2, 0.5, 200), rng.normal(2, 0.5, 200)]).reshape(-1, 1)
     grid = np.linspace(-5, 5, 500).reshape(-1, 1)
@@ -171,7 +188,8 @@ def id_bandwidth_demo():
         dens = np.exp(mdl.score_samples(grid))
         ax.plot(grid.ravel(), dens, label=f"h={h}")
     ax.hist(X.ravel(), bins=40, density=True, alpha=0.25, color="gray")
-    ax.set_xlabel("x"); ax.set_ylabel("density"); ax.set_title("1D bandwidth demo")
+    ax.set_xlabel("x"); ax.set_ylabel("density")
+    ax.set_title("1D bandwidth demo (two peaks)")
     ax.legend()
     fig.savefig(os.path.join(FIGURES, "1d_bandwidth.png"), dpi=150)
     plt.close(fig)
@@ -182,11 +200,11 @@ def id_bandwidth_demo():
 # ---------------------------------------------------------------------------
 
 def run_one(train_seed, val_seed, test_seed):
-    X_train, X_val, X_test, y_test, c_test = make_data(train_seed, val_seed, test_seed)
+    X_train, X_val, X_test, y_test, c_test, a_test = make_data(train_seed, val_seed, test_seed)
     smoke_check(X_train)
     rows = []
-    rows += run_detector("kde", X_train, X_val, X_test, y_test, c_test)
-    rows += run_detector("lof", X_train, X_val, X_test, y_test, c_test)
+    rows += run_detector("kde", X_train, X_val, X_test, y_test, c_test, a_test)
+    rows += run_detector("lof", X_train, X_val, X_test, y_test, c_test, a_test)
     for r in rows:
         r["seed"] = f"{train_seed}/{val_seed}/{test_seed}"
     return rows
@@ -197,16 +215,13 @@ def main():
     s = CFG["seeds"]
     all_rows = run_one(s["train"], s["validation"], s["test"])
 
-    # P1 拓展：多种子重复（核心通过后再做）
+    # P1 拓展：多种子重复
     for rep in s["repeat_list"]:
         all_rows += run_one(rep, rep + 100, rep + 200)
 
     df = pd.DataFrame(all_rows)
     df.to_csv(os.path.join(RESULTS, "metrics.csv"), index=False)
 
-    # 运行日志
-    import platform
-    import sys
     import sklearn
     with open(os.path.join(RESULTS, "run_log.txt"), "w", encoding="utf-8") as f:
         f.write(f"python={sys.version.split()[0]}\n")
@@ -219,7 +234,9 @@ def main():
 
     id_bandwidth_demo()
     print(f"[done] {len(df)} 行结果 -> {os.path.join(RESULTS, 'metrics.csv')}")
-    print(df[["detector", "param", "auroc", "ap", "f1", "fpr_dense", "fpr_sparse"]].to_string(index=False))
+    cols = ["detector", "param", "auroc", "ap", "f1",
+            "recall_distal", "recall_boundary", "fpr_dense", "fpr_sparse"]
+    print(df[cols].to_string(index=False))
 
 
 if __name__ == "__main__":

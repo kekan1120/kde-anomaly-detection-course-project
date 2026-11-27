@@ -1,0 +1,7 @@
+python=3.12.14
+numpy=2.3.5
+pandas=3.0.1
+scikit-learn=1.9.1
+platform=Windows-11-10.0.26300-SP0
+config={"data": {"n_per_cluster_train": 250, "n_per_cluster_val": 150, "n_per_cluster_test": 150, "test_anomaly_ratio": 0.2, "dense_center": [-2.0, 0.0], "dense_cov": 0.25, "sparse_center": [2.0, 0.0], "sparse_cov": 1.0, "anomalies": {"distal": {"x": [5.0, 7.0], "y": [-1.0, 1.0]}, "boundary": {"x": [4.0, 5.0], "y": [-1.0, 1.0]}}}, "seeds": {"train": 1701, "validation": 1702, "test": 1703, "repeat_list": [42, 43, 44, 45, 46]}, "params": {"kde_bandwidths": [0.2, 0.35, 0.5, 0.8, 1.2], "lof_neighbors": [10, 20, 35, 50], "id_bandwidths": [0.2, 0.5, 1.2]}, "threshold": {"quantile": 0.99}}
+elapsed_s=0.8
