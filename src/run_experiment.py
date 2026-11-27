@@ -53,21 +53,25 @@ def make_two_clusters(n_per_cluster, seed):
 
 
 def make_anomalies(n_anom, seed):
-    """生成远端(distal)与边界(boundary)两类异常。返回 (X, a_type)：0=distal, 1=boundary。"""
+    """生成远端(distal)、边界(boundary)、空区紧凑簇(compact)三类异常。
+    返回 (X, a_type)：0=distal, 1=boundary, 2=compact。"""
     rng = np.random.default_rng(seed)
     spec = CFG["data"]["anomalies"]
 
-    def sample(box, n):
+    def sample_box(box, n):
         xs = rng.uniform(box["x"][0], box["x"][1], n)
         ys = rng.uniform(box["y"][0], box["y"][1], n)
         return np.column_stack([xs, ys])
 
-    n_distal = n_anom // 2
-    n_boundary = n_anom - n_distal
-    Xd = sample(spec["distal"], n_distal)
-    Xb = sample(spec["boundary"], n_boundary)
-    X = np.vstack([Xd, Xb])
-    a_type = np.array([0] * n_distal + [1] * n_boundary, dtype=int)
+    n_distal = n_anom // 3
+    n_boundary = n_anom // 3
+    n_compact = n_anom - n_distal - n_boundary
+    Xd = sample_box(spec["distal"], n_distal)
+    Xb = sample_box(spec["boundary"], n_boundary)
+    cc = spec["compact"]
+    Xc = rng.multivariate_normal(cc["center"], cc["std"] * np.eye(2), n_compact)
+    X = np.vstack([Xd, Xb, Xc])
+    a_type = np.array([0] * n_distal + [1] * n_boundary + [2] * n_compact, dtype=int)
     return X, a_type
 
 
@@ -145,7 +149,7 @@ def cluster_fpr(scores, y_test, c_test, threshold):
 def type_recall(scores, y_test, a_test, threshold):
     pred = (scores > threshold).astype(int)
     res = {}
-    for t, name in [(0, "distal"), (1, "boundary")]:
+    for t, name in [(0, "distal"), (1, "boundary"), (2, "compact")]:
         mask = (a_test == t)
         res[f"recall_{name}"] = float(pred[mask].mean()) if mask.any() else np.nan
     return res
@@ -167,6 +171,9 @@ def run_detector(name, X_train, X_val, X_test, y_test, c_test, a_test):
         row.update(evaluate(s_test, y_test, thr))
         row.update(cluster_fpr(s_test, y_test, c_test, thr))
         row.update(type_recall(s_test, y_test, a_test, thr))
+        for t, tname in [(0, "distal"), (1, "boundary"), (2, "compact")]:
+            m = (a_test == t)
+            row[f"score_{tname}"] = float(s_test[m].mean()) if m.any() else np.nan
         rows.append(row)
     return rows
 
@@ -235,7 +242,7 @@ def main():
     id_bandwidth_demo()
     print(f"[done] {len(df)} 行结果 -> {os.path.join(RESULTS, 'metrics.csv')}")
     cols = ["detector", "param", "auroc", "ap", "f1",
-            "recall_distal", "recall_boundary", "fpr_dense", "fpr_sparse"]
+            "recall_distal", "recall_boundary", "recall_compact", "fpr_dense", "fpr_sparse"]
     print(df[cols].to_string(index=False))
 
 
