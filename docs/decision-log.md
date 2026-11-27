@@ -31,7 +31,7 @@
 
 | # | 待办事项 | 责任人 | 备注 |
 |---|---|---|---|
-| 21 | 补 `run_checks.py` 的 C3/C14 适配后跑 **v1.1 正式结果** | C | 输出**新目录**，不得覆盖 v1.0 冻结结果 |
-| 22 | 论文撰写（主结果引 v1.0 far-only；near 待 C 正式结果） | D | 引用口径见 `docs/paper-citation-guide.md` |
-| 23 | 阶段 0 检查清单 C/D 签字 + 各自会话链接 | C、D | 见 `docs/stage0-closure-checklist.md` |
-| 24 | 最终打包 `07_submission/`（两份文件） | A | 截止 2026-12-01 23:41 |
+| 21 | ~~补 C3/C14 适配 + 跑 v1.1 正式结果~~ ✅ 已完成 | C | `05_results/main_v1_1_near/`：核验 17/17、审计 13/13、交叉 12/12、对账 39/39 |
+| 22 | ~~论文撰写~~ ✅ 已完成 | D | `06_paper/course_report.md`，C 复核 32 项 0 错误、0 跨版本混用 |
+| 23 | 阶段 0 签字（**C/D 已签**）；会话链接：C 用 `/export` 凭证待确认、**B 待填** | B、C | 见 `stage0-closure-checklist.md` |
+| 24 | 最终打包 `07_submission/`（两份 docx 已生成） | A | 待 B 链接后重跑 `build_submission.py` 并提交 |
