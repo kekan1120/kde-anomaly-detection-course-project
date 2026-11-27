@@ -32,14 +32,20 @@
 
 ## 2. v1.0 关键文件的 sha256（前 16 位）
 
-| 文件 | sha256 | 含义 |
-|---|---|---|
-| `04_code/config_ref.json` | `A9E7691BDF84906E` | 锁定的预注册配置 |
-| `05_results/main/metrics.csv` | `2FD94BD4D437DA98` | 主结果长表（D 的唯一数据源） |
-| `05_results/main/metrics_multiseed_summary.csv` | `740EBFA008A2E235` | P1 十种子均值±标准差 |
-| `05_results/main/data_fingerprints.json` | `BF5E1A3CDDB933E2` | 三划分指纹（train `bbe5881f…`/validation `ac03679b…`/test `e00edf67…`） |
+> **口径说明（A 补充，2026-11-27）**：仓库开启 `core.autocrlf=true`，`config_ref.json` 在 git 里存 LF、checkout 到工作区变 CRLF，
+> 故其**工作区哈希与 git blob 哈希不同**。下表同时给出两个口径：
+> - **git blob（LF，跨平台稳定，推荐）**：`git show v1.0-results-frozen:<path>` 取原始字节后算 SHA256
+> - **工作区（CRLF，Windows 本机）**：`Get-FileHash <file> -Algorithm SHA256`
 
-完整哈希值可用 `Get-FileHash <file> -Algorithm SHA256` 复算；不一致即说明文件被改动过。
+| 文件 | git blob (LF) | 工作区 (CRLF) | 含义 |
+|---|---|---|---|
+| `04_code/config_ref.json` | `A9E7691BDF84906E` | `E3C15E881484014D` | 锁定的预注册配置 |
+| `05_results/main/metrics.csv` | `452553BCE8661C64` | `2FD94BD4D437DA98` | 主结果长表（D 的唯一数据源） |
+| `05_results/main/metrics_multiseed_summary.csv` | `288CEA8558081CCA` | `740EBFA008A2E235` | P1 十种子均值±标准差 |
+| `05_results/main/data_fingerprints.json` | `285ACA9A54623215` | `BF5E1A3CDDB933E2` | 三划分指纹（train `bbe5881f…`/validation `ac03679b…`/test `e00edf67…`） |
+
+> **校验原则**：以 **git blob 口径为准**（跨平台稳定）；工作区口径仅用于本机快速自查。
+> 若 `git diff v1.0-results-frozen -- <file>` 无输出，即文件内容未被改动——换行符转换不算内容改动。
 
 ## 3. 引用规则（给 D 与 A）
 
