@@ -10,8 +10,10 @@
 为什么必须是 ``inverted_cdf``
 ------------------------------
 ``n=1000`` 时它取第 ``ceil(0.99*1000)=990`` 个次序统计量（0-based 索引 989），于是验证集上
-严格超过阈值的样本数恰为 ``1000-990=10``，经验误报率精确等于 **1.00%**。换成 numpy 默认的
-``linear`` 或 ``higher`` 会落在别的次序统计量上，超阈数不再是 10，跨实现比对直接失败。
+严格超过阈值的样本数恰为 ``1000-990=10``，经验误报率精确等于 **1.00%**。换成其他
+``method`` 可能改变阈值和验证集超阈数；本数据上 ``higher`` 给出 9 个超阈样本，
+``linear``、``lower``、``nearest``、``midpoint`` 也给出 10。因此协议锁定
+``inverted_cdf`` 是为了跨实现统一，而不是因为其他方法在本数据上一定不是 10。
 """
 
 from __future__ import annotations
@@ -38,8 +40,9 @@ def predict(scores: np.ndarray, threshold: float) -> np.ndarray:
 def quantile_method_contrast(scores_val: np.ndarray, quantile: float = 0.99) -> dict:
     """对比不同分位数方法在验证集上的超阈数 —— 举证「方法必须锁定」的那一处。
 
-    这条不是协议要求的产物，而是 C 在核验阈值口径时的自查记录：如果 ``linear`` 也给出
-    10，那么协议里关于方法的强调就属于多余约束；实测它会偏，说明该约束是必要的。
+    这条不是协议要求的产物，而是 C 在核验阈值口径时的自查记录：不同 ``method``
+    可能改变阈值和超阈数；本数据上 ``higher`` 为 9，其余对照方法为 10。
+    协议锁定 ``inverted_cdf`` 是为了跨实现统一。
     """
     out = {}
     for method in ("inverted_cdf", "linear", "higher", "lower", "nearest", "midpoint"):

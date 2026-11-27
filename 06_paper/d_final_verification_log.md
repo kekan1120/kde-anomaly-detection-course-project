@@ -14,10 +14,10 @@
 | A2 | train/validation/test 样本量来源 | `05_results/main/run_log.txt`; `config_ref.v1.0.snapshot.json`; `seed_registry.csv` | train、validation、test 样本量及测试异常比例 | 待填写 | D / 待填 | 待核验 |
 | A3 | 数据生成参数 | `01_protocol_and_data_dictionary.md`; `05_results/main/config_ref.v1.0.snapshot.json`; `run_log.txt` | 均值、标准差、远端环参数、异常比例、标准化设置 | 待填写 | D / 待填 | 待核验 |
 | A4 | 随机种子 | `05_results/main/seed_registry.csv`; v1.0 配置和日志 | train/validation/test、E0、远端环和运行种子 | 待填写 | D / 待填 | 待核验 |
-| A5 | 阈值实现与逐配置阈值 | `04_code/src/kdelof/calibration.py`; `05_results/main/run_log.txt`; `metrics.csv` | 分位数实现、严格大于比较、并列处理、各配置 threshold | 待填写 | D / 待填 | 待核验 |
-| A6 | LOF 分数方向 | `04_code/` LOF 实现; `05_results/main/sanity_checks.md`; API 文档 | 原始输出符号、是否取负、正常点和远端点样例 | 待填写 | D / 待填 | 待核验 |
-| A7 | E0 1D 示意数据 | `05_results/main/e0_demo1d_peaks.csv`; `course_report.md` §4.1 | 各带宽的峰值、谷值/填充率和图中对应数值 | 待填写 | D / 待填 | 待核验 |
-| A8 | 多种子结果实际使用范围 | `05_results/main/metrics_multiseed_summary.csv`; `course_report.md` §4.4 | KDE h=0.35、LOF k=20 的 AUC、AP、稀疏簇 FPR 是否写入正文 | 待填写 | D / 待填 | 待核验 |
+| A5 | 阈值实现与逐配置阈值 | `04_code/src/kdelof/calibration.py`; `05_results/main/run_log.txt`; `metrics.csv` | 分位数实现、严格大于比较、并列处理、各配置 threshold | D 已打开代码、日志和 CSV；阈值及超阈数一致，说明文字已修订 | D / 2026-11-27 | 部分通过 |
+| A6 | LOF 分数方向 | `04_code/` LOF 实现; `05_results/main/sanity_checks.md`; API 文档 | 原始输出符号、是否取负、正常点和远端点样例 | D 已打开实现并核对 C8 方向断言；统一越大越异常 | D / 2026-11-27 | 通过 |
+| A7 | E0 1D 示意数据 | `05_results/main/e0_demo1d_peaks.csv`; `course_report.md` §4.1 | 各带宽的峰值、谷值/填充率和图中对应数值 | D 已逐行核对论文实际报告的峰数和谷填充率；未将未报告峰高视为冲突 | D / 2026-11-27 | 通过 |
+| A8 | 多种子结果实际使用范围 | `05_results/main/metrics_multiseed_summary.csv`; `course_report.md` §4.4 | KDE h=0.35、LOF k=20 的 AUC、AP、稀疏簇 FPR 是否写入正文 | D 已打开汇总 CSV；正文 AUC/稀疏簇 FPR 一致，AP 明确未写入正文 | D / 2026-11-27 | 通过 |
 | A9 | 图资产、图号和图注 | `05_results/main/figures_d/`; `course_report.md` §4; `c_review_of_D.md` | 文件是否存在、正文引用、轴名、参数、阈值、分数方向和图号映射 | 待填写 | D / 待填 | 待核验 |
 | A10 | 提交包全文搜索 | 最终提交目录及 `course_report.md`、追溯表、互审和阶段 0 文件 | `near`、`compact_void`、`ai_draft`、`v1.1` 及相关数字的上下文 | 待填写 | D / 待填 | 待核验 |
 
@@ -29,6 +29,15 @@
 - **A4：部分通过。** `seed_registry.csv` 和 v1.0 配置中的各数据流种子与论文列出的主种子、E0 种子和 far 种子一致，扩展规则为 repeat 1–10、每次偏移 10000；运行日志记录了多种子运行。论文附录只列核心流的简写种子，未列 sparse 流等完整流键，暂记为“附录完整性需确认”，不影响主结果数值。
 
 **核验依据：** 本次记录来自 D 对仓库原始文件的打开、字段/行对照、代码实现查看、运行日志查看和独立计数；DeepSeek 回合 5 的表格只作为核验范围提示，不作为通过证据。
+
+### A5–A8 已执行核验（2026-11-27）
+
+- **A5：部分通过。** `calibration.py`、`experiment.py`、v1.0 配置和 `metrics.csv` 确认每个 detector×parameter 独立使用 `quantile=0.99`、`method="inverted_cdf"`，预测规则为严格 `score > threshold`，等于阈值判正常；10 个配置的验证集超阈数均为 10/1000。默认 KDE/LOF 阈值与论文一致。保留文档风险：`run_log.txt` 和 C9 JSON 显示 `linear/lower/nearest/midpoint` 也得到 10 个超阈样本，而 C9 文字与 calibration docstring 的“仅 inverted_cdf 恰为 10/linear 会偏”表述过强；该风险不改变主 CSV 数字。
+- **A6：通过。** `scoring.py` 的正式 LOF 路径使用 `LocalOutlierFactor(novelty=True, metric="euclidean")`，`experiment.py` 对 validation/test 原始分数统一调用 `to_anomaly_score(raw)=-raw`；`run_log.txt` 和 `sanity_checks.md` C8 记录全部 6 个 KDE 带宽与 4 个 LOF 邻居数方向断言通过。论文“越大越异常”的表述与实现一致。
+- **A7：通过（按论文实际报告字段）。** 已打开 `e0_demo1d_peaks.csv`，三档带宽的局部极大数/显著峰数为 `(8,2)`、`(3,2)`、`(2,1)`，谷填充率为 `0.0007/0.1581/0.9140`，与论文一致；峰高和最大密度虽在 CSV 中存在，但论文未报告，未将其当作缺失数字或冲突。
+- **A8：通过，成员声明另记。** 已打开 `metrics_multiseed_summary.csv` 和 `metrics_multiseed.csv`；KDE h=0.35 的 AUC/稀疏簇 FPR 为 `0.9998±0.0002`、`0.0258±0.0127`，LOF k=20 为 `0.9995±0.0003`、`0.0110±0.0054`，与 §4.4 一致。AP 在汇总文件中存在但正文未使用。A/C 已确认的具体范围和凭证应保留原始成员确认，不由本日志替代。
+
+**当前待处理：** A5 的方法对照文字是否修订；H4 召回句是否补列 `h=0.50`；附录是否补充完整数据流种子；A/C 确认原文是否归档到 B 类证据。
 
 ## B 类：需要 A 或 C 本人确认
 

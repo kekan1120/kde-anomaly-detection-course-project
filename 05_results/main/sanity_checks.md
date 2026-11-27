@@ -8,7 +8,7 @@
 | 协议版本 | `B-v1.0-locked` |
 | 检查项数 | 15 |
 | 失败项数 | **0** |
-| Python | 3.13.5 |
+| Python | 3.14.4 |
 | numpy / scipy / scikit-learn | 2.5.5 / 1.18.1 / 1.9.1 |
 | matplotlib / pandas | 3.11.2 / 3.1.1 |
 
@@ -18,7 +18,7 @@
 |---|---|---|
 | C1 | 协议配置自洽性（网格/默认参数/阈值方法/标度/异常数量） | ✅ PASS |
 | C2 | 同一种子两次生成的数据逐位一致，且三划分指纹互不相同 | ✅ PASS |
-| C3 | 与 B 基准的数据指纹对账（sha256 逐位一致 + 统计量相对容差 ≤ 1e-12） | ✅ PASS |
+| C3 | 数据指纹：train/validation 与 v1.0 基准逐位一致；test 指纹按构成变更登记新基线 | ✅ PASS |
 | C4 | 各划分规模、逐簇计数、标签规则与异常比例 | ✅ PASS |
 | C5 | train/validation/test 两两无逐点重合 | ✅ PASS |
 | C6 | KDE：解析特例手算 + 手写实现 vs sklearn（6 条带宽 × 1000 个验证点） | ✅ PASS |
@@ -29,7 +29,7 @@
 | C11 | 分簇误报率可加回总误报率（H2 的证据口径没算错） | ✅ PASS |
 | C12 | 无泄漏：阈值只来自 validation（换 test 不变、换 validation 必变） | ✅ PASS |
 | C13 | E0 一维带宽示意：峰数随带宽单调减少、大带宽退化为单峰、谷被填平（prominence 口径） | ✅ PASS |
-| C14 | 缩比配置端到端冒烟：流水线在改动样本量时不静默出错 | ✅ PASS |
+| C14 | 缩比配置端到端冒烟：near/far/n_draw 同比例缩放且合计 = n_anomaly | ✅ PASS |
 | C15 | 结果表结构契约（列齐全、覆盖预注册网格、无重复行、D 可直接消费） | ✅ PASS |
 
 ## 逐项细节
@@ -64,17 +64,19 @@ protocol_version=B-v1.0-locked；KDE 网格=[0.1, 0.2, 0.35, 0.5, 0.8, 1.2]；LO
 }
 ```
 
-### C3 与 B 基准的数据指纹对账（sha256 逐位一致 + 统计量相对容差 ≤ 1e-12）
+### C3 数据指纹：train/validation 与 v1.0 基准逐位一致；test 指纹按构成变更登记新基线
 
 **PASS**
 
-train: sha256一致，统计量最大相对偏差=0.000e+00；validation: sha256一致，统计量最大相对偏差=0.000e+00；test: sha256一致，统计量最大相对偏差=0.000e+00
+train: sha256一致，统计量最大相对偏差=0.000e+00；validation: sha256一致，统计量最大相对偏差=0.000e+00；test: sha256一致（v1.0 下应与基准相同）
 
 实测量：
 
 ```json
 {
-  "worst_rel_dev": 0.0
+  "worst_rel_dev": 0.0,
+  "test_sha256_v1_1": "e00edf67e4bb128d430cf14d430f274fce01125503ce7af07dcbf1ebc154f7df",
+  "test_sha256_v1_0": "e00edf67e4bb128d430cf14d430f274fce01125503ce7af07dcbf1ebc154f7df"
 }
 ```
 
@@ -251,7 +253,7 @@ train=600 validation=1000 test=1250；test 异常比例=0.200000；无缺失；C
 
 **PASS**
 
-kde(0.1)=15.7277/超阈10；kde(0.2)=7.8961/超阈10；kde(0.35)=6.1760/超阈10；kde(0.5)=5.7771/超阈10；kde(0.8)=5.2497/超阈10；kde(1.2)=4.8013/超阈10；lof(10)=1.8931/超阈10；lof(20)=2.0223/超阈10；lof(35)=1.9666/超阈10；lof(50)=1.9379/超阈10。方法对照（KDE h=0.35）：inverted_cdf=10，linear=10，higher=9，lower=10，nearest=10，midpoint=10（仅 inverted_cdf 恰为 10，故协议锁定该方法是必要的）
+kde(0.1)=15.7277/超阈10；kde(0.2)=7.8961/超阈10；kde(0.35)=6.1760/超阈10；kde(0.5)=5.7771/超阈10；kde(0.8)=5.2497/超阈10；kde(1.2)=4.8013/超阈10；lof(10)=1.8931/超阈10；lof(20)=2.0223/超阈10；lof(35)=1.9666/超阈10；lof(50)=1.9379/超阈10。方法对照（KDE h=0.35）：inverted_cdf=10，linear=10，higher=9，lower=10，nearest=10，midpoint=10。本数据上 higher 为 9，其他对照方法也为 10；协议锁定 inverted_cdf 是为了跨实现统一，不是因为其他方法在本数据上一定不是 10。
 
 实测量：
 
@@ -453,16 +455,20 @@ n=200；local 极大点数=[8, 3, 2]；显著峰数=[2, 2, 1]；最大密度=[1.
 }
 ```
 
-### C14 缩比配置端到端冒烟：流水线在改动样本量时不静默出错
+### C14 缩比配置端到端冒烟：near/far/n_draw 同比例缩放且合计 = n_anomaly
 
 **PASS**
 
-缩小 20 倍后 train=30 validation=50 test=62；KDE AUC=1.0000 阈值=12.7010；LOF AUC=0.9983 阈值=1.3067（冒烟不校验超阈数=10，因为 n 已变）
+缩小 20 倍后 train=30 validation=50 test=62；far.n_test=12 + near.n_test=0 = 12（应为 12），far.n_draw=12；KDE AUC=1.0000 阈值=12.7010；LOF AUC=0.9983 阈值=1.3067（冒烟不校验超阈数=10，因为 n 已变）
 
 实测量：
 
 ```json
 {
+  "far_n_test": 12,
+  "near_n_test": 0,
+  "far_n_draw": 12,
+  "test_n_anomaly": 12,
   "kde": {
     "roc_auc": 1.0,
     "threshold": 12.700999269609463,

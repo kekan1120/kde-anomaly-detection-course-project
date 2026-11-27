@@ -246,7 +246,7 @@ def check_threshold(cfg: dict, data: dict) -> dict:
         ok = ok and n_exc == expect
         detail.append(f"{det}({p:g})={thr:.4f}/超阈{n_exc}")
 
-    # 分位数方法对照：证明「必须 inverted_cdf」不是多余约束
+    # 分位数方法对照：记录实现差异，协议仍统一锁定 inverted_cdf
     h0 = float(cfg["detectors"]["kde"]["default_bandwidth"])
     s0 = scoring.to_anomaly_score(scoring.kde_log_density(train_X, val_X, h0))
     contrast = calibration.quantile_method_contrast(s0, cfg["threshold"]["quantile"])
@@ -257,7 +257,7 @@ def check_threshold(cfg: dict, data: dict) -> dict:
            ok and contrast_ok,
            "；".join(detail) + "。方法对照（KDE h=0.35）："
            + "，".join(f"{m}={v['n_exceedance']}" for m, v in contrast.items())
-           + f"（仅 inverted_cdf 恰为 {expect}，故协议锁定该方法是必要的）",
+           + f"。本数据上 higher 为 9，其他对照方法也为 {expect}；协议锁定 inverted_cdf 是为了跨实现统一，不是因为其他方法在本数据上一定不是 {expect}。",
            # 键名与 B 的套件保持一致（"kde:0.35" -> {threshold,...}），
            # 这样 B 的 audit_results.py 可以直接审计 C 的结果文件（见 cross_audit.py）
            {**rows, "quantile_method_contrast": contrast})

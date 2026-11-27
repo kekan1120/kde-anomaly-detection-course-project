@@ -2,8 +2,8 @@
   "protocol_version": "B-v1.0-locked",
   "author_role": "C 实现与复现负责人",
   "environment": {
-    "python": "3.13.5",
-    "executable": "D:\\ml\\.venv\\Scripts\\python.exe",
+    "python": "3.14.4",
+    "executable": "C:\\Users\\Edward\\Desktop\\11\\ml\\github-sync-kde\\.venv\\Scripts\\python.exe",
     "platform": "Windows-11-10.0.26200-SP0",
     "numpy": "2.5.5",
     "scipy": "1.18.1",
@@ -36,11 +36,13 @@
     },
     {
       "id": "C3",
-      "name": "与 B 基准的数据指纹对账（sha256 逐位一致 + 统计量相对容差 ≤ 1e-12）",
+      "name": "数据指纹：train/validation 与 v1.0 基准逐位一致；test 指纹按构成变更登记新基线",
       "status": "PASS",
-      "detail": "train: sha256一致，统计量最大相对偏差=0.000e+00；validation: sha256一致，统计量最大相对偏差=0.000e+00；test: sha256一致，统计量最大相对偏差=0.000e+00",
+      "detail": "train: sha256一致，统计量最大相对偏差=0.000e+00；validation: sha256一致，统计量最大相对偏差=0.000e+00；test: sha256一致（v1.0 下应与基准相同）",
       "measured": {
-        "worst_rel_dev": 0.0
+        "worst_rel_dev": 0.0,
+        "test_sha256_v1_1": "e00edf67e4bb128d430cf14d430f274fce01125503ce7af07dcbf1ebc154f7df",
+        "test_sha256_v1_0": "e00edf67e4bb128d430cf14d430f274fce01125503ce7af07dcbf1ebc154f7df"
       }
     },
     {
@@ -197,7 +199,7 @@
       "id": "C9",
       "name": "阈值校准：10 个配置的验证集超阈数恒为 10/1000；分位数方法对照",
       "status": "PASS",
-      "detail": "kde(0.1)=15.7277/超阈10；kde(0.2)=7.8961/超阈10；kde(0.35)=6.1760/超阈10；kde(0.5)=5.7771/超阈10；kde(0.8)=5.2497/超阈10；kde(1.2)=4.8013/超阈10；lof(10)=1.8931/超阈10；lof(20)=2.0223/超阈10；lof(35)=1.9666/超阈10；lof(50)=1.9379/超阈10。方法对照（KDE h=0.35）：inverted_cdf=10，linear=10，higher=9，lower=10，nearest=10，midpoint=10（仅 inverted_cdf 恰为 10，故协议锁定该方法是必要的）",
+      "detail": "kde(0.1)=15.7277/超阈10；kde(0.2)=7.8961/超阈10；kde(0.35)=6.1760/超阈10；kde(0.5)=5.7771/超阈10；kde(0.8)=5.2497/超阈10；kde(1.2)=4.8013/超阈10；lof(10)=1.8931/超阈10；lof(20)=2.0223/超阈10；lof(35)=1.9666/超阈10；lof(50)=1.9379/超阈10。方法对照（KDE h=0.35）：inverted_cdf=10，linear=10，higher=9，lower=10，nearest=10，midpoint=10。本数据上 higher 为 9，其他对照方法也为 10；协议锁定 inverted_cdf 是为了跨实现统一，不是因为其他方法在本数据上一定不是 10。",
       "measured": {
         "kde:0.1": {
           "threshold": 15.727733455661657,
@@ -382,10 +384,14 @@
     },
     {
       "id": "C14",
-      "name": "缩比配置端到端冒烟：流水线在改动样本量时不静默出错",
+      "name": "缩比配置端到端冒烟：near/far/n_draw 同比例缩放且合计 = n_anomaly",
       "status": "PASS",
-      "detail": "缩小 20 倍后 train=30 validation=50 test=62；KDE AUC=1.0000 阈值=12.7010；LOF AUC=0.9983 阈值=1.3067（冒烟不校验超阈数=10，因为 n 已变）",
+      "detail": "缩小 20 倍后 train=30 validation=50 test=62；far.n_test=12 + near.n_test=0 = 12（应为 12），far.n_draw=12；KDE AUC=1.0000 阈值=12.7010；LOF AUC=0.9983 阈值=1.3067（冒烟不校验超阈数=10，因为 n 已变）",
       "measured": {
+        "far_n_test": 12,
+        "near_n_test": 0,
+        "far_n_draw": 12,
+        "test_n_anomaly": 12,
         "kde": {
           "roc_auc": 1.0,
           "threshold": 12.700999269609463,
