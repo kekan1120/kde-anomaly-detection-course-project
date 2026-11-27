@@ -82,7 +82,7 @@ B 已逐项读完 `research-questions-hypotheses.md`、`glossary.md` 与 `04_cod
 |---|---|---|---|
 | A | [member_A.md](../process-logs/member_A.md) | session-d74f302b-694c-4833-9469-70713f36e171 | 已建，链接已填 |
 | B | [member_B.md](../process-logs/member_B.md) | 待填 | **模板已建，待本人填真实回合** |
-| C | [member_C.md](../process-logs/member_C.md) | https://github.com/kekan1120/kde-anomaly-detection-course-project/blob/main/process-logs/member_C_session_export.md | **已建，链接已填**（客户端 `/export` 导出的原始会话；原始 ZIP 同目录） |
+| C | [member_C.md](../process-logs/member_C.md) | https://github.com/kekan1120/kde-anomaly-detection-course-project/blob/main/process-logs/member_C_session_export.md | **已建，链接已填**（客户端 `/export` 导出的原始会话全文转写） |
 | D | [member_D.md](../process-logs/member_D.md) | https://chat.deepseek.com/share/finjt1j2r3rl7znvqf | **链接与真实回合已填** |
 
 > 记录必须是本人账号下同一连续会话的真实交互；不得虚构提示词、模型错误或核验结果。

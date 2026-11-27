@@ -5,9 +5,8 @@
 | 会话 ID | `session-d45d2b76-a1bd-48c6-897e-69e0530118c7` |
 | 会话起止 | 2026-11-26 20:24 → 2026-11-27 14:41（Asia/Shanghai） |
 | 导出方式 | 客户端「下载 Session 日志」（`/export`），得到 `dsh-session-…c7.zip`；本文件由其中的 `session.v4.jsonl` 全文转写，未删改对话内容 |
-| 原始文件 | 同目录 `member_C_session_export.zip`（含 `session.v4.jsonl` 与图片附件） |
+| 原始文件 | 客户端导出的 dsh-session-…c7.zip（含 session.v4.jsonl 与图片附件）；ZIP 体积较大未入库，本文件即其全文转写 |
 | sha256（session.v4.jsonl） | `a05a4cb15bd26f1a5b6abad7847ad299a0f956a5e2ae1939cad591821b1a4dc7` |
-| sha256（zip） | `3479d35cd9b90e68af3daa58ef1195711e8323743d8041fe473c0f99139f294e` |
 | 条目计数 | 我的提示词 11 条 · 模型输出块 222 个 · 工具输出 261 条 |
 | 说明 | 工具输出为避免文件过大做了截断（保留前 400 字符，标注「截断」）；对话正文与提示词原文未截断。结构化整理版见 [member_C.md](member_C.md) |
 
@@ -1183,10 +1182,16 @@ git config --global --unset https.proxy
 
 ### 【我】2026-11-27 10:41
 
-成员A 要求在 C 的正式实现里开启 anomaly.near（空区紧凑簇）：enabled=true，near.n_test=125、far.n_test=125，测试集仍 1250 条、异常仍 250 条（合计 20%）。决定已记入 A 的 decision-log #15。
-约束：① 不要就地修改 04_code/config_ref.json，它是 B 锁定的 v1.0，改了就毁掉旧结果可复现性；② v1.0 结果目录不许动；③ 先只给变更计划，不写代码、不运行。
-计划要覆盖：新配置文件放在哪、protocol_version 怎么标、哪些脚本/常量要参数化、哪些核验项会因此失效、旧结果如何继续被引用、变更记录写到哪个文件、以及「改动前是否已看过测试结果」怎么写。
-另外先回答一个问题，不要跑实验：LocalOutlierFactor(novelty=True) 只用 train 正常样本做参照时，它会把 (0,5) 附近 sd=0.35 的那团点判成异常还是正常？ 给推理链。B 的设计说明写的是「LOF 判正常」，我怀疑那是非 novelty 模式（参照集里含同类点）才成立。
+成员A 要求在 C 的正式实现里开启 anomaly.near（空区紧凑簇）：enabled=true，near.n_test=125、far.n_test=125，测试集仍 1250 条、异常仍 250 条（合计 20%）。决定已记入 A 的 decision-log #15。
+
+
+约束：① 不要就地修改 04_code/config_ref.json，它是 B 锁定的 v1.0，改了就毁掉旧结果可复现性；② v1.0 结果目录不许动；③ 先只给变更计划，不写代码、不运行。
+
+
+计划要覆盖：新配置文件放在哪、protocol_version 怎么标、哪些脚本/常量要参数化、哪些核验项会因此失效、旧结果如何继续被引用、变更记录写到哪个文件、以及「改动前是否已看过测试结果」怎么写。
+
+
+另外先回答一个问题，不要跑实验：LocalOutlierFactor(novelty=True) 只用 train 正常样本做参照时，它会把 (0,5) 附近 sd=0.35 的那团点判成异常还是正常？ 给推理链。B 的设计说明写的是「LOF 判正常」，我怀疑那是非 novelty 模式（参照集里含同类点）才成立。
 
 
 ### 【模型】2026-11-27 10:43
@@ -1367,20 +1372,34 @@ git config --global --unset https.proxy
 
 ### 【我】2026-11-27 10:49
 
-计划我看了。LOF 那段我接受，但 C18 是错的，先复算再改，别顺着我。
-
-按协议 §3.1：v1.0 是 theta=uniform(0,2π,250) 之后才抽 r=uniform(5,7,250)；v1.1 是 theta=uniform(0,2π,125) 之后立刻抽 r=uniform(5,7,125)。同一条 PCG64 流下，v1.0 的第 251 次抽样才开始抽 r，v1.1 的第 126 次就开始。所以只有前 125 个 theta 相同，r 全部不同，v1.1 的 far 点与 v1.0 的 far 点没有一个相等。C18 的「逐位相等」必挂。
-
-给两条互斥改法，各写清代价，我来选： A. 承认不嵌套：删 C18，far 子集只比统计量（n、均值/标准差在容差内），并注明「换样本量即换随机流位置」。 B. 真嵌套：v1.1 仍抽 250 个 theta 与 250 个 r，再取前 125 个作为 far（显式截断）。代价是抽样规格与协议 §3.1 字面不同，得在 change_record 补一条并经 A/B 确认。
-
-再补 4 件漏的：
-
-v1.1 是否重跑 10 种子？不跑就没有 v1.1 的稳定性证据；跑就把 metrics_multiseed*.csv 另存新目录。
-seed_registry.csv 的 near 行 n 从 0 改成 125，不只是改角色文案。
-每类异常只有 125 个 → 召回分辨率 0.8%，且 near 整团很可能同进同出 → 论文口径要写明「该类型召回近似 0/1 量」，不能当连续指标解释。
-06_paper/section3_4_draft.md 与 README 验收表要标 v1.1 口径，防止 D 拿错版本。
-最后，执行前先给一张预测表：v1.1 相对 v1.0，roc_auc、average_precision、recall_far、recall_compact_void、fp_dense、fp_sparse 各自升还是降，理由一句一条。特别是 AUC——新增 125 个「两种方法都给高分」的易分点，AUC 有可能回升而不是下降，你怎么判？
-
+计划我看了。LOF 那段我接受，但 C18 是错的，先复算再改，别顺着我。
+
+
+
+按协议 §3.1：v1.0 是 theta=uniform(0,2π,250) 之后才抽 r=uniform(5,7,250)；v1.1 是 theta=uniform(0,2π,125) 之后立刻抽 r=uniform(5,7,125)。同一条 PCG64 流下，v1.0 的第 251 次抽样才开始抽 r，v1.1 的第 126 次就开始。所以只有前 125 个 theta 相同，r 全部不同，v1.1 的 far 点与 v1.0 的 far 点没有一个相等。C18 的「逐位相等」必挂。
+
+
+
+给两条互斥改法，各写清代价，我来选： A. 承认不嵌套：删 C18，far 子集只比统计量（n、均值/标准差在容差内），并注明「换样本量即换随机流位置」。 B. 真嵌套：v1.1 仍抽 250 个 theta 与 250 个 r，再取前 125 个作为 far（显式截断）。代价是抽样规格与协议 §3.1 字面不同，得在 change_record 补一条并经 A/B 确认。
+
+
+
+再补 4 件漏的：
+
+
+
+v1.1 是否重跑 10 种子？不跑就没有 v1.1 的稳定性证据；跑就把 metrics_multiseed*.csv 另存新目录。
+
+seed_registry.csv 的 near 行 n 从 0 改成 125，不只是改角色文案。
+
+每类异常只有 125 个 → 召回分辨率 0.8%，且 near 整团很可能同进同出 → 论文口径要写明「该类型召回近似 0/1 量」，不能当连续指标解释。
+
+06_paper/section3_4_draft.md 与 README 验收表要标 v1.1 口径，防止 D 拿错版本。
+
+最后，执行前先给一张预测表：v1.1 相对 v1.0，roc_auc、average_precision、recall_far、recall_compact_void、fp_dense、fp_sparse 各自升还是降，理由一句一条。特别是 AUC——新增 125 个「两种方法都给高分」的易分点，AUC 有可能回升而不是下降，你怎么判？
+
+
+
 本轮只做 P0（冻结 tag、写 05_results/INDEX.md），做完停下，把 diff 给我看。配置和代码等 A/B 回话再动。
 
 
@@ -1516,12 +1535,18 @@ r 块起点随 theta 块长度平移，所以只有 theta 前 125 个相同，**
 
 ### 【我】2026-11-27 10:53
 
-追加修正，覆盖上一条里「新建 v1.x 配置并跑正式结果」的部分：队友确认协议版本权归 B，disclaimer 禁止同版本改字段。
-
-不要产出任何标为 v1.1 正式结果的东西；不要动 config_ref.json。
-改为交三件待签件：04_code/patches/config_patch_near.json（只放 3 个字段差异 + change_record）、§12 变更记录一行草稿、一页影响清单（把上轮那张表压成一页：哪些核验项变、哪些逐位不变）。
-若要验机制，跑 ad-hoc 诊断到 05_results/ad_hoc/near_enabled/，run_log 首行写 protocol=NOT LOCKED (awaiting B-v1.1)、status=ad-hoc，并注明不得作为论文主结果。
-把你已经改过的文件列出来；若已新建 config_v1_1_near.json，改名或标成 patch，避免仓库里出现两个"数值真源"。
+追加修正，覆盖上一条里「新建 v1.x 配置并跑正式结果」的部分：队友确认协议版本权归 B，disclaimer 禁止同版本改字段。
+
+
+
+不要产出任何标为 v1.1 正式结果的东西；不要动 config_ref.json。
+
+改为交三件待签件：04_code/patches/config_patch_near.json（只放 3 个字段差异 + change_record）、§12 变更记录一行草稿、一页影响清单（把上轮那张表压成一页：哪些核验项变、哪些逐位不变）。
+
+若要验机制，跑 ad-hoc 诊断到 05_results/ad_hoc/near_enabled/，run_log 首行写 protocol=NOT LOCKED (awaiting B-v1.1)、status=ad-hoc，并注明不得作为论文主结果。
+
+把你已经改过的文件列出来；若已新建 config_v1_1_near.json，改名或标成 patch，避免仓库里出现两个"数值真源"。
+
 明确写出决策权归属：协议版本=B，开启决定=A(#15)，实现与证据=C，分层报告=D。 本轮就停在「补丁 + 变更记录 + 影响清单」三件，其余等 B 回复
 
 
@@ -1728,12 +1753,19 @@ run_log 首两行固定：
 
 ### 【我】2026-11-27 11:00
 
-要推，但要先合并！！远端已不是你上次看到的 7f4990c：A 推了 5 个提交，main 现在 c9ecdec，含目录统一（src→04_code/ai_draft、results→05_results/ai_draft）、docs/experiment-protocol.md、docs/stage0-closure-checklist.md、B/D 记录模板。你本地的 942502a、53fead1 未推送，直接 push 必被拒。
-git fetch origin，先报 origin/main 相对 7f4990c 的变更（按目录），并确认它有没有动过 04_code/src、04_code/run_*.py、04_code/config_ref.json、05_results/main/、05_results/ref_check/。若动过，停下报我，不许继续。
-合并 origin/main 到当前分支；冲突文件先列出来，逐个说明你打算怎么处理，不许 --ours/--theirs 整份丢。
-合并后做 v1.0 回归：run_checks / run_audit / reconcile 必须仍是 15/15、13/13、50/50；05_results/main/metrics.csv 的 sha256 必须仍是 2FD94BD4D437DA98。任一项变了就停。
-通过后推：git push origin main + git push origin v1.0-results-frozen。
-回报里加一条「给 A 的口径纠正」：A 写的「主结果采用 far + near@(0,5)」不成立，v1.0 主结果是 far-only；near 需 B 升 B-v1.1 后才有结果。
+要推，但要先合并！！远端已不是你上次看到的 7f4990c：A 推了 5 个提交，main 现在 c9ecdec，含目录统一（src→04_code/ai_draft、results→05_results/ai_draft）、docs/experiment-protocol.md、docs/stage0-closure-checklist.md、B/D 记录模板。你本地的 942502a、53fead1 未推送，直接 push 必被拒。
+
+
+git fetch origin，先报 origin/main 相对 7f4990c 的变更（按目录），并确认它有没有动过 04_code/src、04_code/run_*.py、04_code/config_ref.json、05_results/main/、05_results/ref_check/。若动过，停下报我，不许继续。
+
+合并 origin/main 到当前分支；冲突文件先列出来，逐个说明你打算怎么处理，不许 --ours/--theirs 整份丢。
+
+合并后做 v1.0 回归：run_checks / run_audit / reconcile 必须仍是 15/15、13/13、50/50；05_results/main/metrics.csv 的 sha256 必须仍是 2FD94BD4D437DA98。任一项变了就停。
+
+通过后推：git push origin main + git push origin v1.0-results-frozen。
+
+回报里加一条「给 A 的口径纠正」：A 写的「主结果采用 far + near@(0,5)」不成立，v1.0 主结果是 far-only；near 需 B 升 B-v1.1 后才有结果。
+
 仍然不要建 v1.x 配置、不跑正式结果。
 
 
@@ -2105,16 +2137,26 @@ metrics.csv  sha256 = 2FD94BD4D437DA9881B3EDA4A75331A5B2A0F42D44DB76AEECD269A628
 
 ### 【我】2026-11-27 12:31
 
-B 已推送（ccf95da / 442d9e6）：config_ref.json 升为 B-v1.1-near；far.n_test=125 且新增 far.n_draw=250（Q-A 取点级嵌套）；near.enabled=true、n_test=125；near.design_note 已按我们的实测改写；Silverman 三个参考带宽修正为 0.1932/0.3865/0.8312。Q-B 接受 B-v1.1（v1.0 仍是预注册主结果），Q-C 跑 10 种子。三件待签件已签。
-
-本轮只做三步，不跑 v1.1：
-
-1）只读核对：git diff 7f4990c origin/main -- 04_code/config_ref.json，逐条列出会影响 C 代码的字段（版本号、far.n_test/n_draw、near.*、Silverman 数值），并说明每一条各自影响哪个模块。报告完停下，不要改代码。
-
-2）实现 n_draw：dgp.sample_far_ring 改为「按 n_draw 抽 theta 与 r，再取前 n_test 行」；n_draw 缺省时等于 n_test（保证 v1.0 行为逐位不变）；加断言 n_test <= n_draw。给出改动前后的 diff。
-
-3）v1.0 回归（不许跳）：用 tag v1.0-results-frozen 的配置跑一遍全流程，确认 ①05_results/main/metrics.csv sha256 仍是 2FD94BD4D437DA98 ②三划分指纹不变 ③reconcile_with_baseline 仍 50/50、0 偏差。这是证明「改代码没改旧数字」的唯一证据。
-
+B 已推送（ccf95da / 442d9e6）：config_ref.json 升为 B-v1.1-near；far.n_test=125 且新增 far.n_draw=250（Q-A 取点级嵌套）；near.enabled=true、n_test=125；near.design_note 已按我们的实测改写；Silverman 三个参考带宽修正为 0.1932/0.3865/0.8312。Q-B 接受 B-v1.1（v1.0 仍是预注册主结果），Q-C 跑 10 种子。三件待签件已签。
+
+
+
+本轮只做三步，不跑 v1.1：
+
+
+
+1）只读核对：git diff 7f4990c origin/main -- 04_code/config_ref.json，逐条列出会影响 C 代码的字段（版本号、far.n_test/n_draw、near.*、Silverman 数值），并说明每一条各自影响哪个模块。报告完停下，不要改代码。
+
+
+
+2）实现 n_draw：dgp.sample_far_ring 改为「按 n_draw 抽 theta 与 r，再取前 n_test 行」；n_draw 缺省时等于 n_test（保证 v1.0 行为逐位不变）；加断言 n_test <= n_draw。给出改动前后的 diff。
+
+
+
+3）v1.0 回归（不许跳）：用 tag v1.0-results-frozen 的配置跑一遍全流程，确认 ①05_results/main/metrics.csv sha256 仍是 2FD94BD4D437DA98 ②三划分指纹不变 ③reconcile_with_baseline 仍 50/50、0 偏差。这是证明「改代码没改旧数字」的唯一证据。
+
+
+
 做完停下，把 影响字段清单 + n_draw diff + v1.0 回归三项证据 发我。v1.1 正式跑、C3/C14 适配、C17/C18、10 种子、合并推送，等我下一轮指令。
 
 
@@ -2350,17 +2392,35 @@ B 已推送（ccf95da / 442d9e6）：config_ref.json 升为 B-v1.1-near；far.n_
 ### 【我】2026-11-27 12:39
 
 合并远端 → 适配核验 → 跑 v1.1 核心 → 与 B 的 v1.1 参考结果对账。注意不做 10 种子、不做图、不 push。
-我定的任务计划
-1）合并：git fetch 后 merge origin/main（当前落后 3 个提交：442d9e6 B 签 v1.1、ccf95da B 登 05_results/ref_check_v1.1、2bb380f A 同步决策 #19–24）。冲突文件逐个说明处理理由，不许整份取一边。合并完先跑 v1.0 回归四项（metrics.csv sha256、三划分指纹、50 项对账、15+13 项核验），全绿才继续；任一项变了立刻停。
-2）补三处卫生：① sample_compact_void 的 docstring 改成与已签 near.design_note 一致（“novelty 下两法都判异常，不是方法差异判别点”）；② write_seed_registry 增加 far.n_draw 列（字段缺失时按 n_test 记录并注明“缺省”）；③ 把 n_test <= n_draw 的校验上移到 protocol.load_config，dgp 里只保留防御性断言。
-3）适配 C3 / C14：C3 只比 train/validation 的指纹与统计量；test 指纹登记为 v1.1 新基线，并写明“构成从 250 far 变为 125 far + 125 near，指纹必然变”。C14 修 smoke_config：near.n_test、far.n_test、far.n_draw 按同一比例缩放，并断言合计 = n_anomaly。
-4）新增 C17 / C18：
-C17 不变性：10 个阈值、val_mean_log_likelihood、fp_dense、fp_sparse、fpr_dense、fpr_sparse、n_normal_dense/sparse、train/validation 指纹 —— 逐项报 max|Δ|，期望 0。
-C18 点级嵌套：v1.1 的 125 个 far 点与 v1.0 前 125 点逐位相等；再加一条更强的：这些点上的 KDE 分数与 LOF 分数也逐位相等（分数只依赖 train + 该点，train 未变），报“不等个数”。
-5）跑 v1.1 核心（E0/E1/E2/E3）到新目录 05_results/main_v1_1_near/，不覆盖 05_results/main/。run_log.txt 首行必须含 protocol_version、config sha256、far.n_draw、n_anomaly_far、n_anomaly_compact_void。
-6）与 B 的 v1.1 参考结果对账：目标目录 05_results/ref_check_v1.1/，逐列比，报 max|Δ|（容差 1e-9）。不许把 B 的数字写成你的实测。
-7）预测-实测对照：把你上轮的预测表逐行填实测值，标“命中 / 偏差”，偏差给一句机制解释。特别核对 roc_auc——上一轮你算成 /375000，这轮用真实分母 250×1000 再看。
-8）停下，交：合并结果与回归四项、C3/C14/C17/C18 的实测输出、v1.1 的 12 行主结果、对账 max|Δ|、预测-实测对照表。
+我定的任务计划
+
+
+1）合并：git fetch 后 merge origin/main（当前落后 3 个提交：442d9e6 B 签 v1.1、ccf95da B 登 05_results/ref_check_v1.1、2bb380f A 同步决策 #19–24）。冲突文件逐个说明处理理由，不许整份取一边。合并完先跑 v1.0 回归四项（metrics.csv sha256、三划分指纹、50 项对账、15+13 项核验），全绿才继续；任一项变了立刻停。
+
+
+2）补三处卫生：① sample_compact_void 的 docstring 改成与已签 near.design_note 一致（“novelty 下两法都判异常，不是方法差异判别点”）；② write_seed_registry 增加 far.n_draw 列（字段缺失时按 n_test 记录并注明“缺省”）；③ 把 n_test <= n_draw 的校验上移到 protocol.load_config，dgp 里只保留防御性断言。
+
+
+3）适配 C3 / C14：C3 只比 train/validation 的指纹与统计量；test 指纹登记为 v1.1 新基线，并写明“构成从 250 far 变为 125 far + 125 near，指纹必然变”。C14 修 smoke_config：near.n_test、far.n_test、far.n_draw 按同一比例缩放，并断言合计 = n_anomaly。
+
+
+4）新增 C17 / C18：
+
+
+C17 不变性：10 个阈值、val_mean_log_likelihood、fp_dense、fp_sparse、fpr_dense、fpr_sparse、n_normal_dense/sparse、train/validation 指纹 —— 逐项报 max|Δ|，期望 0。
+
+C18 点级嵌套：v1.1 的 125 个 far 点与 v1.0 前 125 点逐位相等；再加一条更强的：这些点上的 KDE 分数与 LOF 分数也逐位相等（分数只依赖 train + 该点，train 未变），报“不等个数”。
+
+5）跑 v1.1 核心（E0/E1/E2/E3）到新目录 05_results/main_v1_1_near/，不覆盖 05_results/main/。run_log.txt 首行必须含 protocol_version、config sha256、far.n_draw、n_anomaly_far、n_anomaly_compact_void。
+
+
+6）与 B 的 v1.1 参考结果对账：目标目录 05_results/ref_check_v1.1/，逐列比，报 max|Δ|（容差 1e-9）。不许把 B 的数字写成你的实测。
+
+
+7）预测-实测对照：把你上轮的预测表逐行填实测值，标“命中 / 偏差”，偏差给一句机制解释。特别核对 roc_auc——上一轮你算成 /375000，这轮用真实分母 250×1000 再看。
+
+
+8）停下，交：合并结果与回归四项、C3/C14/C17/C18 的实测输出、v1.1 的 12 行主结果、对账 max|Δ|、预测-实测对照表。
 
 
 ### 【模型】2026-11-27 12:40
@@ -2805,18 +2865,30 @@ B 的数字全程只读，未写入任何 C 的实测字段。
 
 ### 【我】2026-11-27 12:50
 
-本轮：补审计 → 10 种子 → v1.1 图 → 文档 → 合并推送。仍然不碰 v1.0 目录。
-
-1）对 v1.1 目录补两套审计：run_audit.py --results 05_results/main_v1_1_near（A1–A13，13 项全绿）；再跑 cross_audit.py --results 05_results/main_v1_1_near（把 B 的 12 项审计指向 v1.1）。A13 要额外断言：recall_compact_void 从 NaN 变成实数、n_anomaly_compact_void 从 0 变成 125，列集合不变。
-
-2）10 种子（Q-C）：--multiseed 跑到 v1.1 目录，另存 metrics_multiseed{,_summary}.csv，不覆盖 v1.0 的任何文件。汇总表里除原有列外加一列 recall_compact_void_mean，用于检验「每个种子是否都整团同进」（应为 1.000 或 0.000，不出现中间值）。
-
-3）v1.1 只出分层图（3 张，别出全套）：① recall 按 anomaly_type 堆叠/分组（far vs compact_void，两检测器并排）② 两检测器在 compact_void 与 far 上的分数分布（含各自阈值线）③ v1.0→v1.1 的 AUC/错排配对数变化（说明「升是构成变了」）。图标题必须带 v1.1 分层补充（非主结果）。
-
-4）文档三处：06_paper/section3_4_draft.md 加 §3.4.7「v1.1 分层补充」+ 硬警告「AUC/AP 不得跨版本比较」；05_results/INDEX.md 在该行补「论文主图仍只取 v1.0」；README.md 验收表加 v1.1 行。
-
-5）合并推送：git fetch 看远端是否又动；若动过先合并并重跑回归四项再推。推 main + 需要的 tag（v1.0-results-frozen 已存在，新 tag v1.1-near-results 等 D 确认后再打，本轮不打）。
-
+本轮：补审计 → 10 种子 → v1.1 图 → 文档 → 合并推送。仍然不碰 v1.0 目录。
+
+
+
+1）对 v1.1 目录补两套审计：run_audit.py --results 05_results/main_v1_1_near（A1–A13，13 项全绿）；再跑 cross_audit.py --results 05_results/main_v1_1_near（把 B 的 12 项审计指向 v1.1）。A13 要额外断言：recall_compact_void 从 NaN 变成实数、n_anomaly_compact_void 从 0 变成 125，列集合不变。
+
+
+
+2）10 种子（Q-C）：--multiseed 跑到 v1.1 目录，另存 metrics_multiseed{,_summary}.csv，不覆盖 v1.0 的任何文件。汇总表里除原有列外加一列 recall_compact_void_mean，用于检验「每个种子是否都整团同进」（应为 1.000 或 0.000，不出现中间值）。
+
+
+
+3）v1.1 只出分层图（3 张，别出全套）：① recall 按 anomaly_type 堆叠/分组（far vs compact_void，两检测器并排）② 两检测器在 compact_void 与 far 上的分数分布（含各自阈值线）③ v1.0→v1.1 的 AUC/错排配对数变化（说明「升是构成变了」）。图标题必须带 v1.1 分层补充（非主结果）。
+
+
+
+4）文档三处：06_paper/section3_4_draft.md 加 §3.4.7「v1.1 分层补充」+ 硬警告「AUC/AP 不得跨版本比较」；05_results/INDEX.md 在该行补「论文主图仍只取 v1.0」；README.md 验收表加 v1.1 行。
+
+
+
+5）合并推送：git fetch 看远端是否又动；若动过先合并并重跑回归四项再推。推 main + 需要的 tag（v1.0-results-frozen 已存在，新 tag v1.1-near-results 等 D 确认后再打，本轮不打）。
+
+
+
 6）回报：v1.1 的两套审计结果、10 种子汇总表、三张图路径、三处文档的 diff 摘要、push 后的远端 HEAD。
 
 
