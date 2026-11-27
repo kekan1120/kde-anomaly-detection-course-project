@@ -27,12 +27,14 @@
 
 - [x] 论文正文 `06_paper/course_report.md`（按 `docs/paper-writing-brief-for-D.md`；待 A 排版、C 复核）
 - [x] 阶段 0 检查清单 D 行签字 + `member_D.md` 真实回合与会话链接
+- [x] D→A 理论/文献互审证据 `06_paper/d_review_of_A.md`
 
 ## 四、阶段 0 关闭（全组）
 
 - [ ] C 在 `docs/stage0-closure-checklist.md` 的 2.3 确认（D 已完成）
 - [ ] 四份记录均有会话链接（A、D 已填；B、C 待补，D 真实回合已记录）
 - [ ] A 在 `PROJECT_STATUS.md` 标记「阶段 0 已关闭」
+- [ ] 向助教确认 C 的 DSH 导出是否可替代公网会话链接（模板：`docs/ta-confirmation-request.md`）
 
 ## 五、提交前 12 项检查
 
