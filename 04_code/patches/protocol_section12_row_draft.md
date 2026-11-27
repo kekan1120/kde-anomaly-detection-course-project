@@ -40,5 +40,5 @@
 ## 5. 签署栏
 
 - [ ] A 确认：`docs/decision-log.md` #15 的理由行与「不预期产生方法差异」的更正已并入
-- [ ] B 确认：版本号、Q-A 的 far 抽样口径、Q-C 的多种子决定
+- [x] B 确认（2026-11-27）：版本号 `B-v1.1-near`、Q-A 取抽 250 再取前 125（已落为 `far.n_draw = 250`）、Q-C 跑 10 种子。行已由 B 贴入 `01_protocol_and_data_dictionary.md` §12。
 - [ ] C 确认：字段差异与 `config_patch_near.json` 一致，无额外改动

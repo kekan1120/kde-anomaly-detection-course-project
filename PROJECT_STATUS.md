@@ -1,6 +1,6 @@
 # 项目状态
 
-- 状态：**阶段2 完成；阶段3 结果已冻结（far-only v1.0）；near 待 B-v1.1**
+- 状态：**B 已完成交付；B-v1.1-near 已签署；待 C 适配后跑 v1.1 正式结果、D 出主结果**
 - 更新日期：2026-11-27
 - 选题：核密度估计与基于密度的异常检测
 - 分支：实验分支
@@ -25,14 +25,14 @@
 | 研究问题与假设可证伪化 | 已起草 | A 完成 `docs/research-questions-hypotheses.md`，待全组核准 |
 | 四名成员个人会话记录 | 1/4 链接已填 | 4 份文件已建；A 链接已填，B/C/D 待补 |
 | 阶段0关闭检查清单 | 已建立 | `docs/stage0-closure-checklist.md`：6 条退出条件 + 四人确认/核准表 |
-| 阶段0章程核准 | 进行中 | 待 B/C/D 在检查清单打勾确认后关闭 |
+| 阶段0章程核准 | 进行中（B 已签） | A、B 已确认；待 C/D 在检查清单打勾后关闭 |
 
 ## 阶段0退出条件
 
 - [x] 四名成员姓名和组长已登记。
 - [x] 截止日期及提交入口格式已从课程平台确认。
-- [ ] 每名成员的任务、交付件和交叉审阅对象已确认。（待 B/C/D 签字，见检查清单 2.3）
-- [ ] 研究问题、假设、数据划分、参数选择和指标协议经全组核准。（待 B/C/D 签字，见检查清单三）
+- [ ] 每名成员的任务、交付件和交叉审阅对象已确认。（A、B 已签；待 C/D，见检查清单 2.3）
+- [ ] 研究问题、假设、数据划分、参数选择和指标协议经全组核准。（A、B 已签；待 C/D，见检查清单三）
 - [ ] 四份个人AI过程记录已建立并记录对应会话链接维护人。（4 份文件已建，会话链接待补）
 - [x] GitHub远程公开仓库已创建并连接。
 
@@ -51,7 +51,7 @@
 | 干净环境重跑（新建 venv + 独立输出目录） | 一致 | 指纹 sha256 一致，指标最大偏差 0.0 |
 | 交叉审查 B 的参考实现 | 发现并修正 1 处缺陷 | `04_code/ref_check/PATCHES_C.md` |
 | 个人 AI 过程记录 | 已建立 | `process-logs/member_C.md` |
-| 空区紧凑簇 `anomaly.near` 启用 | 待 **B 发布 B-v1.1**（A 已按 #15 决定启用） | 提案：`docs/protocol-change-B-v1.1.md`；C 已交三件待签件 `04_code/patches/`（配置补丁 + §12 行草稿 + 影响清单）；B 签署前不产出正式结果、不新建 v1.x 配置 |
+| 空区紧凑簇 `anomaly.near` 启用 | **B-v1.1-near 已签署生效** | `04_code/config_ref.json` 已升 B-v1.1-near（far 125 / n_draw 250 + near 125）；B 参考结果见 `05_results/ref_check_v1.1/`；待 C 补 `run_checks.py` 的 C3/C14 适配后跑正式 v1.1 结果 |
 | 待办：本机会话分享链接 | 待本人填写 | `process-logs/member_C.md` 表头 |
 
 ## 最新进展（2026-11-27）
@@ -65,3 +65,7 @@
 | 论文引用口径 | 已建立，待 D 使用 | `docs/paper-citation-guide.md`（禁止引用 near / ai_draft 数字） |
 | 阶段0关闭包 | 已建立，待 B/C/D 签字 | `docs/stage0-closure-checklist.md` |
 | A 会话链接 | 已填 | `process-logs/member_A.md` |
+| **B 交付入库** | 完成 | `01_protocol_and_data_dictionary.md`（权威协议）、`HANDOFF_README.md`、`START_HERE.md`、`process-logs/member_B.md`（7 回合）；`config_ref.json` 升 **B-v1.1-near** |
+| **B 裁定三问** | 完成 | Q-A 点级嵌套（新增 `far.n_draw=250`，抽样与 n_test 解耦）；Q-B 接受 `B-v1.1-near`（v1.0 仍为预注册主结果）；Q-C 跑 10 种子 |
+| **v1.1 参考结果** | 已产出（B 侧） | `05_results/ref_check_v1.1/`；C17 不变性 max\|Δ\|=0、C18 far 点级嵌套成立、`recall_compact_void` 全 10 配置 = 125/125 |
+| **A 文档被 B 取代/修订** | 已处理 | `docs/experiment-protocol.md` §1–§9 加「已被取代」横幅；`stage0-closure-checklist.md` B 已签并附两条建议（H3 判据、术语表分位数）已采纳 |

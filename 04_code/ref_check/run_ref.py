@@ -32,7 +32,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import reference_impl as ri  # noqa: E402
 
 HERE = Path(__file__).resolve().parent
-RESULTS = HERE.parent.parent / "05_results" / "ref_check"
+# 输出目录可用环境变量覆盖，供 B-v1.1 等新版本写到独立目录，
+# 避免覆盖已冻结的 B-v1.0 基线（05_results/ref_check）。
+#   例：$env:KDE_RESULTS_DIR = "ref_check_v1.1"
+import os as _os
+
+_RESULTS_NAME = _os.environ.get("KDE_RESULTS_DIR", "ref_check")
+RESULTS = HERE.parent.parent / "05_results" / _RESULTS_NAME
 FIGDIR = RESULTS / "figures"
 
 METRIC_COLUMNS = [
