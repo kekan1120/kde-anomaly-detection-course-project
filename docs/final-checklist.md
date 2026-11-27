@@ -31,7 +31,7 @@
 ## 四、阶段 0 关闭（全组）
 
 - [ ] C 在 `docs/stage0-closure-checklist.md` 的 2.3 确认（D 已完成）
-- [ ] 四份记录均有会话链接（A/D 已填；C 用 `/export` 凭证待确认；**B 待填**）
+- [x] 四份记录均有会话凭证（D 分享链接；A/C/B 均用 DSH 导出文件，规范见 [`session-link-policy.md`](session-link-policy.md)；B 于 2026-11-27 补填）
 - [ ] A 在 `PROJECT_STATUS.md` 标记「阶段 0 已关闭」
 
 ## 五、提交前 12 项检查
