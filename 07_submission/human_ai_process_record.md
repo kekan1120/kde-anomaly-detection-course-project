@@ -320,6 +320,7 @@
 |---|---|
 | 成员 / 角色 | C 沈伊镄 —— 实现与复现负责人 |
 | 会话 | 本人账号下的**同一个连续会话**（ID `session-d45d2b76-a1bd-48c6-897e-69e0530118c7`），中途一次 fork 续接，工作未中断 |
+| 会话分享链接 | [process-logs/member_C_session_export.md](https://github.com/kekan1120/kde-anomaly-detection-course-project/blob/main/process-logs/member_C_session_export.md) —— 客户端 `/export` 导出的原始会话（11 条提示词、222 个模型输出块、261 条工具输出）；原始 ZIP 见 [member_C_session_export.zip](https://github.com/kekan1120/kde-anomaly-detection-course-project/blob/main/process-logs/member_C_session_export.zip) |
 | 会话跨度 | 2026-11-26 至 2026-11-27（跨两日，含一次夜间中断；全程同一会话，共 10 个回合） |
 | 机器 / 环境 | Windows 11 + Python 3.13.5 + numpy 2.5.5 / scipy 1.18.1 / scikit-learn 1.9.1 / matplotlib 3.11.2 / pandas 3.1.1 |
 | 主责交付物 | `04_code/`（正式实现 + 5 个入口脚本）、`05_results/main/`（v1.0 主结果）、`05_results/main_v1_1_near/`（v1.1 分层补充）、`env/`（依赖锁定与自查）、`06_paper/section3_4_draft.md`（给 D 的素材） |
@@ -591,7 +592,7 @@
 
 ---
 
-## 4. 我做的四个关键取舍（模型只提供选项，不替我决定）
+## 4. 我做的取舍（模型只提供选项，不替我决定）
 
 1. **不就地改协议配置**：`config_ref.json` 是 B 的权。C 只出「补丁 + 变更记录 + 影响清单」三件待签件，让 B 的决策成本降到 30 秒。
 2. **选「真嵌套」而不是「承认不嵌套」**：代价是协议要补一句抽样口径（后来落成 `far.n_draw=250`），收益是 far 侧**逐位可比**，v1.1 的变化能完全归因到 near 上。
@@ -649,7 +650,7 @@
 
 | 项 | 现状 |
 |---|---|
-| 会话分享链接 | 本机 DSH 桌面端默认不含公网分享服务；以「完整会话导出 + 仓库链接」作为凭证，链接**待本人提交前补填**（不虚填） |
+| 会话分享链接 | **已填**：`process-logs/member_C_session_export.md`（客户端 `/export` 的原文转写）+ 同目录 `.zip`（原始导出）。本机 DSH 桌面端默认不含公网分享服务，故以「完整会话导出 + 仓库链接」作为可访问凭证 |
 | 阶段 0 清单签字 | 表格里的勾选是协作文档的一部分，**签字日期必须由本人确认后填写**；未确认前不自称已签 |
 | D 的数字复核 | **已执行**（回合 11）：`04_code/review_D_numbers.py` 32 项，30 通过；2 项 FAIL 均属图件（图 5 图注缺轴名、一张图未被引用）。另列 7 条建议（含正文零引用角标）。**数值层 0 错误、0 跨版本混用**；修订交 D，C 不改稿 |
 | v1.1 的定位 | post-hoc 分层补充，**非预注册主结果**；`near` 开启前已看过 v1.0 结果，此点已在 `change_record` 中如实标注 |
