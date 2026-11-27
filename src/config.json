@@ -26,6 +26,7 @@
     "id_bandwidths": [0.2, 0.5, 1.2]
   },
   "threshold": {
-    "quantile": 0.99
+    "quantile": 0.99,
+    "supp_quantile": 0.95
   }
 }

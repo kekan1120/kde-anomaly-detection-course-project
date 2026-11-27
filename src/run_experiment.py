@@ -3,18 +3,20 @@
 KDE vs LOF 异常检测对照实验（第 1 题 · 实验分支）
 实现骨架由 AI 生成，须由 C（沈伊镄）人工核验并复现。
 
-v2 修正：异常改为「远端 + 边界」两类（y 收窄到正常范围），并分类型报告召回，
-        避免 v1 中「异常点 y 偏移过大 → 全部 AUROC=1.0、无区分度」的问题。
+v3 变更：
+- 三类异常：远端(distal) / 边界(boundary) / 空区紧凑簇(compact)
+- 补充操作点：主操作点 99% 分位(≈1% FPR)，补充 95% 分位(≈5% FPR)，只加操作点不改设计
+- 三张图：参数-AUROC、分簇/分类得分分布、KDE vs LOF 得分对比
 
 依赖：numpy, pandas, scikit-learn, matplotlib
 运行：python run_experiment.py
-输出：results/metrics.csv、results/figures/*.png、results/run_log.txt
+输出：results/metrics.csv、results/score_details.csv、results/figures/*.png、results/run_log.txt
 
-关键约定（与协议一致）：
+关键约定：
 - 异常分数统一「越大越异常」。
-  KDE : s = -KernelDensity.score_samples（score_samples 返回 log-density）
-  LOF : s = -LocalOutlierFactor(novelty=True).score_samples（score_samples 返回 -LOF）
-- 阈值仅用正常验证集分数的 99% 分位数；测试集只在流程锁定后评估一次。
+  KDE : s = -KernelDensity.score_samples（log-density 取负）
+  LOF : s = -LocalOutlierFactor(novelty=True).score_samples（返回 -LOF，取负）
+- 阈值仅用正常验证集分数分位数；测试集只在流程锁定后评估。
 """
 import json
 import os
@@ -37,12 +39,14 @@ os.makedirs(FIGURES, exist_ok=True)
 with open(os.path.join(HERE, "config.json"), encoding="utf-8") as f:
     CFG = json.load(f)
 
+Q_MAIN = CFG["threshold"]["quantile"]          # 0.99 -> ~1% FPR
+Q_SUPP = CFG["threshold"].get("supp_quantile", 0.95)  # 0.95 -> ~5% FPR
+
 # ---------------------------------------------------------------------------
 # 数据生成
 # ---------------------------------------------------------------------------
 
 def make_two_clusters(n_per_cluster, seed):
-    """两个密度不同的正常二维高斯簇。返回 (X, cluster_id)：0=密集, 1=稀疏。"""
     rng = np.random.default_rng(seed)
     d = CFG["data"]
     dense = rng.multivariate_normal(d["dense_center"], d["dense_cov"] * np.eye(2), n_per_cluster)
@@ -53,8 +57,7 @@ def make_two_clusters(n_per_cluster, seed):
 
 
 def make_anomalies(n_anom, seed):
-    """生成远端(distal)、边界(boundary)、空区紧凑簇(compact)三类异常。
-    返回 (X, a_type)：0=distal, 1=boundary, 2=compact。"""
+    """三类异常：0=distal, 1=boundary, 2=compact。"""
     rng = np.random.default_rng(seed)
     spec = CFG["data"]["anomalies"]
 
@@ -76,7 +79,6 @@ def make_anomalies(n_anom, seed):
 
 
 def make_data(train_seed, val_seed, test_seed):
-    """生成 train/val/test。返回 (X_train, X_val, X_test, y_test, c_test, a_test)。"""
     d = CFG["data"]
     X_train, _ = make_two_clusters(d["n_per_cluster_train"], train_seed)
     X_val, _ = make_two_clusters(d["n_per_cluster_val"], val_seed)
@@ -90,7 +92,7 @@ def make_data(train_seed, val_seed, test_seed):
     X_test = np.vstack([X_test_n, X_test_a])
     y_test = np.concatenate([np.zeros(n_normal), np.ones(n_anom)]).astype(int)
     c_test = np.concatenate([c_test_n, -np.ones(n_anom, dtype=int)])
-    a_test = np.concatenate([-np.ones(n_normal, dtype=int), a_test_a])  # -1=正常
+    a_test = np.concatenate([-np.ones(n_normal, dtype=int), a_test_a])
     return X_train, X_val, X_test, y_test, c_test, a_test
 
 
@@ -110,20 +112,14 @@ def lof_scores(X_train, X_eval, k):
 
 def smoke_check(X_train):
     far = np.array([[100.0, 100.0]])
-    s_kde_norm = kde_scores(X_train, X_train[:1], 0.5)[0]
-    s_kde_far = kde_scores(X_train, far, 0.5)[0]
-    assert s_kde_far > s_kde_norm, "KDE 分数方向错误"
-    s_lof_norm = lof_scores(X_train, X_train[:1], 10)[0]
-    s_lof_far = lof_scores(X_train, far, 10)[0]
-    assert s_lof_far > s_lof_norm, "LOF 分数方向错误"
+    assert kde_scores(X_train, far, 0.5)[0] > kde_scores(X_train, X_train[:1], 0.5)[0], "KDE 分数方向错误"
+    assert lof_scores(X_train, far, 10)[0] > lof_scores(X_train, X_train[:1], 10)[0], "LOF 分数方向错误"
     print("[smoke] 分数方向通过：远端点得分高于正常训练点")
 
 
 def evaluate(scores, y_test, threshold=None):
-    out = {
-        "auroc": roc_auc_score(y_test, scores),
-        "ap": average_precision_score(y_test, scores),
-    }
+    out = {"auroc": roc_auc_score(y_test, scores),
+           "ap": average_precision_score(y_test, scores)}
     if threshold is not None:
         pred = (scores > threshold).astype(int)
         tn, fp, fn, tp = confusion_matrix(y_test, pred).ravel()
@@ -155,8 +151,11 @@ def type_recall(scores, y_test, a_test, threshold):
     return res
 
 
+def _suffix(d, suf):
+    return {f"{k}{suf}": v for k, v in d.items()}
+
+
 def run_detector(name, X_train, X_val, X_test, y_test, c_test, a_test):
-    q = CFG["threshold"]["quantile"]
     grid = CFG["params"]["kde_bandwidths"] if name == "kde" else CFG["params"]["lof_neighbors"]
     rows = []
     for p in grid:
@@ -166,11 +165,16 @@ def run_detector(name, X_train, X_val, X_test, y_test, c_test, a_test):
         else:
             s_val = lof_scores(X_train, X_val, p)
             s_test = lof_scores(X_train, X_test, p)
-        thr = float(np.quantile(s_val, q))
-        row = {"detector": name, "param": p, "threshold": thr}
-        row.update(evaluate(s_test, y_test, thr))
-        row.update(cluster_fpr(s_test, y_test, c_test, thr))
-        row.update(type_recall(s_test, y_test, a_test, thr))
+        thr_main = float(np.quantile(s_val, Q_MAIN))
+        thr_supp = float(np.quantile(s_val, Q_SUPP))
+        row = {"detector": name, "param": p, "threshold": thr_main}
+        row.update(evaluate(s_test, y_test, thr_main))
+        row.update(cluster_fpr(s_test, y_test, c_test, thr_main))
+        row.update(type_recall(s_test, y_test, a_test, thr_main))
+        row["threshold_q95"] = thr_supp
+        row.update(_suffix(evaluate(s_test, y_test, thr_supp), "_q95"))
+        row.update(_suffix(cluster_fpr(s_test, y_test, c_test, thr_supp), "_q95"))
+        row.update(_suffix(type_recall(s_test, y_test, a_test, thr_supp), "_q95"))
         for t, tname in [(0, "distal"), (1, "boundary"), (2, "compact")]:
             m = (a_test == t)
             row[f"score_{tname}"] = float(s_test[m].mean()) if m.any() else np.nan
@@ -179,10 +183,30 @@ def run_detector(name, X_train, X_val, X_test, y_test, c_test, a_test):
 
 
 # ---------------------------------------------------------------------------
+# 得分明细（供分簇/分类得分分布图）
+# ---------------------------------------------------------------------------
+
+def make_score_details():
+    s = CFG["seeds"]
+    X_train, _, X_test, y_test, c_test, a_test = make_data(s["train"], s["validation"], s["test"])
+    frames = []
+    for det, p in [("kde", 0.5), ("lof", 35)]:
+        sc = kde_scores(X_train, X_test, p) if det == "kde" else lof_scores(X_train, X_test, p)
+        group = []
+        for i in range(len(X_test)):
+            if y_test[i] == 0:
+                group.append("dense" if c_test[i] == 0 else "sparse")
+            else:
+                group.append(["distal", "boundary", "compact"][a_test[i]])
+        frames.append(pd.DataFrame({"detector": det, "group": group, "score": sc}))
+    return pd.concat(frames, ignore_index=True)
+
+
+# ---------------------------------------------------------------------------
 # 1D 带宽示意
 # ---------------------------------------------------------------------------
 
-def id_bandwidth_demo():
+def plot_1d_bandwidth():
     import matplotlib
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
@@ -191,15 +215,80 @@ def id_bandwidth_demo():
     grid = np.linspace(-5, 5, 500).reshape(-1, 1)
     fig, ax = plt.subplots(figsize=(8, 4))
     for h in CFG["params"]["id_bandwidths"]:
-        mdl = KernelDensity(kernel="gaussian", bandwidth=h).fit(X)
-        dens = np.exp(mdl.score_samples(grid))
+        dens = np.exp(KernelDensity(kernel="gaussian", bandwidth=h).fit(X).score_samples(grid))
         ax.plot(grid.ravel(), dens, label=f"h={h}")
     ax.hist(X.ravel(), bins=40, density=True, alpha=0.25, color="gray")
-    ax.set_xlabel("x"); ax.set_ylabel("density")
-    ax.set_title("1D bandwidth demo (two peaks)")
-    ax.legend()
-    fig.savefig(os.path.join(FIGURES, "1d_bandwidth.png"), dpi=150)
-    plt.close(fig)
+    ax.set_xlabel("x"); ax.set_ylabel("density"); ax.set_title("1D bandwidth demo (two peaks)")
+    ax.legend(); fig.savefig(os.path.join(FIGURES, "1d_bandwidth.png"), dpi=150); plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# 图 1：参数 - AUROC 曲线（含多种子误差棒）
+# ---------------------------------------------------------------------------
+
+def plot_param_auroc(df):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    fig, axes = plt.subplots(1, 2, figsize=(11, 4.2), sharey=True)
+    specs = [("kde", "bandwidth h", axes[0]), ("lof", "neighbours k", axes[1])]
+    for det, xlabel, ax in specs:
+        sub = df[df.detector == det]
+        g = sub.groupby("param")["auroc"].agg(["mean", "std"]).reset_index()
+        ax.errorbar(g["param"], g["mean"], yerr=g["std"].fillna(0), marker="o", capsize=3, label=det.upper())
+        ax.set_xlabel(xlabel); ax.set_ylabel("AUROC"); ax.set_title(f"{det.upper()} sensitivity")
+        ax.grid(alpha=0.3)
+    fig.suptitle("AUROC vs parameter (mean +- std over seeds)")
+    fig.tight_layout()
+    fig.savefig(os.path.join(FIGURES, "param_auroc.png"), dpi=150); plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# 图 2：分簇/分类得分分布（KDE 与 LOF 各一）
+# ---------------------------------------------------------------------------
+
+def plot_score_distribution(details):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    groups = ["dense", "sparse", "distal", "boundary", "compact"]
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.5), sharey=True)
+    for ax, det in zip(axes, ["kde", "lof"]):
+        sub = details[details.detector == det]
+        data = [sub[sub.group == g]["score"].values for g in groups]
+        ax.boxplot(data, tick_labels=groups, showfliers=False)
+        ax.set_title(f"{det.upper()} score by group")
+        ax.set_ylabel("anomaly score (higher = more anomalous)")
+        ax.grid(alpha=0.3, axis="y")
+        ax.tick_params(axis="x", rotation=20)
+    fig.suptitle("Score distribution: normal clusters vs anomaly types")
+    fig.tight_layout()
+    fig.savefig(os.path.join(FIGURES, "score_distribution.png"), dpi=150); plt.close(fig)
+
+
+# ---------------------------------------------------------------------------
+# 图 3：KDE vs LOF 各类异常得分对比
+# ---------------------------------------------------------------------------
+
+def plot_kde_vs_lof(df):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    types = ["distal", "boundary", "compact"]
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    width = 0.35
+    x = np.arange(len(types))
+    for i, det in enumerate(["kde", "lof"]):
+        sub = df[df.detector == det]
+        vals = [sub[f"score_{t}"].mean() for t in types]
+        errs = [sub[f"score_{t}"].std() for t in types]
+        ax.bar(x + (i - 0.5) * width, vals, width, yerr=errs, capsize=3, label=det.upper())
+    ax.set_xticks(x); ax.set_xticklabels(types)
+    ax.set_ylabel("mean anomaly score (higher = more anomalous)")
+    ax.set_title("KDE vs LOF: mean score by anomaly type")
+    ax.legend(); ax.grid(alpha=0.3, axis="y")
+    fig.tight_layout()
+    fig.savefig(os.path.join(FIGURES, "kde_vs_lof_scores.png"), dpi=150); plt.close(fig)
 
 
 # ---------------------------------------------------------------------------
@@ -221,13 +310,14 @@ def main():
     t0 = time.time()
     s = CFG["seeds"]
     all_rows = run_one(s["train"], s["validation"], s["test"])
-
-    # P1 拓展：多种子重复
     for rep in s["repeat_list"]:
         all_rows += run_one(rep, rep + 100, rep + 200)
 
     df = pd.DataFrame(all_rows)
     df.to_csv(os.path.join(RESULTS, "metrics.csv"), index=False)
+
+    details = make_score_details()
+    details.to_csv(os.path.join(RESULTS, "score_details.csv"), index=False)
 
     import sklearn
     with open(os.path.join(RESULTS, "run_log.txt"), "w", encoding="utf-8") as f:
@@ -239,11 +329,18 @@ def main():
         f.write(f"config={json.dumps(CFG, ensure_ascii=False)}\n")
         f.write(f"elapsed_s={time.time() - t0:.1f}\n")
 
-    id_bandwidth_demo()
+    plot_1d_bandwidth()
+    plot_param_auroc(df)
+    plot_score_distribution(details)
+    plot_kde_vs_lof(df)
+
     print(f"[done] {len(df)} 行结果 -> {os.path.join(RESULTS, 'metrics.csv')}")
-    cols = ["detector", "param", "auroc", "ap", "f1",
-            "recall_distal", "recall_boundary", "recall_compact", "fpr_dense", "fpr_sparse"]
-    print(df[cols].to_string(index=False))
+    print("主操作点(99%)与补充操作点(95%)对比 — compact 召回：")
+    g = df.groupby("detector").agg(
+        rc_1pct=("recall_compact", "mean"), rc_5pct=("recall_compact_q95", "mean"),
+        rb_1pct=("recall_boundary", "mean"), rb_5pct=("recall_boundary_q95", "mean"),
+        auroc=("auroc", "mean"), fs=("fpr_sparse", "mean")).round(3)
+    print(g.to_string())
 
 
 if __name__ == "__main__":
