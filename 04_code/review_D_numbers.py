@@ -112,8 +112,13 @@ def main() -> int:
               f"实测 {int(r.val_exceedance_count)}")
 
     # ---- 8 版本泄漏
+    # The reproduction appendix may name the current config version; result
+    # claims in the paper body must remain strictly on the frozen v1.0 data.
+    result_body = re.split(r"^## 附录：复现索引\s*$", paper, maxsplit=1,
+                           flags=re.M)[0]
     for pat in (r"\bv1\.1\b", r"\bnear\b", r"compact_void"):
-        check(f"无版本泄漏 {pat}", not re.search(pat, paper), "未出现" if not re.search(pat, paper) else "出现")
+        found = re.search(pat, result_body) is not None
+        check(f"正文无版本泄漏 {pat}", not found, "出现" if found else "未出现")
 
     # ---- 9 图资产
     assets = {p.name for p in (RESULTS / "figures_d").glob("*.png")}

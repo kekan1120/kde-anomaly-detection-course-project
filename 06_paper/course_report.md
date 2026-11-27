@@ -33,11 +33,11 @@ KDE 的输出是概率密度，不是概率。连续分布的单点概率为 0�
 
 ### 2.1 符号约定
 
-训练样本为 $x_1,\ldots,x_n\in\mathbb R^d$，核函数为 $K$，各向同性带宽为 $h>0$。训练集只用于拟合，正常验证集只用于阈值校准，测试集在参数和流程冻结后作一次最终评估。LOF 的邻居数记为 $k$。
+训练样本为 $x_1,\ldots,x_n\in\mathbb R^d$，核函数为 $K$，各向同性带宽为 $h>0$。训练集只用于拟合，正常验证集只用于阈值校准，测试集在参数和流程冻结后作一次最终评估。LOF 的邻居数记为 $k$。[5]
 
 ### 2.2 KDE 公式与异常分数
 
-核密度估计定义为
+核密度估计定义为 [1]
 
 $$
 \widehat p_h(x)=\frac{1}{n h^d}\sum_{i=1}^{n}K\left(\frac{x-x_i}{h}\right).
@@ -73,7 +73,7 @@ $$
 \operatorname{lrd}_k(x)=\left(\frac{1}{|N_k(x)|}\sum_{y\in N_k(x)}\operatorname{reach\text{-}dist}_k(x,y)\right)^{-1},
 $$
 
-局部异常因子为
+局部异常因子为 [2]
 
 $$
 \operatorname{LOF}_k(x)=\frac{1}{|N_k(x)|}\sum_{y\in N_k(x)}\frac{\operatorname{lrd}_k(y)}{\operatorname{lrd}_k(x)}.
@@ -114,7 +114,7 @@ KDE 带宽网格为 $\{0.10,0.20,0.35,0.50,0.80,1.20\}$，LOF 邻居数网格为
 
 实验按“拟合—校准—评估”三段隔离。E0 固定一维双峰样本、核函数和绘图网格，只改变 $h\in\{0.08,0.30,0.90\}$；E1 只改变 KDE 带宽；E2 只改变 LOF 邻居数；E3 固定预先指定的默认参数，只改变检测器。两个检测器均为确定性算法，随机性只来自数据生成。
 
-数据生成使用独立 `numpy.random.Generator(PCG64(seed))`，二维簇采用显式的均值加尺度乘标准正态，远端异常采用先生成角度再生成半径的参数化圆环。阈值使用 `inverted_cdf`，1000 个正常验证样本严格超过阈值的样本数为 10。根据 `05_results/main/sanity_checks.md`、`audit_results.md` 和 `reconciliation_vs_B.md`，正式实现分别通过 15 项正确性检查、13 项结果审计并完成 50 项逐项对账；这些计数不属于 `metrics.csv` 字段。
+数据生成使用独立 `numpy.random.Generator(PCG64(seed))`，二维簇采用显式的均值加尺度乘标准正态，远端异常采用先生成角度再生成半径的参数化圆环。阈值使用 `inverted_cdf`，1000 个正常验证样本严格超过阈值的样本数为 10。根据 `05_results/main/sanity_checks.md`、`audit_results.md` 和 `reconciliation_vs_B.md`，正式实现分别通过 15 项正确性检查、13 项结果审计并完成 50 项逐项对账；这些计数不属于 `metrics.csv` 字段。[3][4]
 
 ## 4 结果与分析
 
@@ -142,7 +142,11 @@ LOF 的 AUC 从 $k=10$ 的 0.9979 增至 $k=50$ 的 0.9995，AP 从 0.9919 增�
 
 ![默认操作点](../05_results/main/figures_d/d_default_cluster_fpr.png)
 
-**图 5.** 默认操作点下密集与稀疏正常簇的测试误报率。KDE 使用 $h=0.35$、阈值 6.1760；LOF 使用 $k=20$、阈值 2.0223；阈值均由正常验证集 99% 经验分位数（`inverted_cdf`）确定。测试集中每个正常簇有 500 个样本，共 1000 个正常样本和 250 个远端异常；异常分数方向为越大越异常。
+**图 5.** 默认操作点下密集与稀疏正常簇的测试误报率。横轴为检测器（KDE $h=0.35$ / LOF $k=20$），纵轴为正常簇测试误报率（堆叠：密集簇 + 稀疏簇）。KDE 使用 $h=0.35$、阈值 6.1760；LOF 使用 $k=20$、阈值 2.0223；阈值均由正常验证集 99% 经验分位数（`inverted_cdf`）确定。测试集中每个正常簇有 500 个样本，共 1000 个正常样本和 250 个远端异常；异常分数方向为越大越异常。
+
+![默认指标对照](../05_results/main/figures_d/d_default_metrics_comparison.png)
+
+**图 5a.** 默认操作点的整体检测指标对照，横轴为指标，纵轴为指标值；KDE 为 $h=0.35$，LOF 为 $k=20$，数据为含 1000 个正常样本和 250 个远端异常的冻结测试集，分数方向为越大越异常。
 
 | 方法 | AUC | AP | Precision | Recall | F1 | 总 FPR | 密集簇 FPR | 稀疏簇 FPR | TP/FP/TN/FN |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---|
@@ -161,7 +165,7 @@ KDE 在默认点的 AUC、AP、召回和 F1 较高；LOF 的总体 FPR 为 0.009
 
 ### 4.4 多种子稳定性
 
-作为 P1 多种子补充（来源为 `05_results/main/metrics_multiseed_summary.csv`，不属于主 `metrics.csv`），十次预先登记的重复中，KDE $h=0.35$ 的 AUC 为 $0.9998\pm0.0002$，稀疏簇 FPR 为 $0.0258\pm0.0127$；LOF $k=20$ 的 AUC 为 $0.9995\pm0.0003$，稀疏簇 FPR 为 $0.0110\pm0.0054$。这些结果仅作稳健性补充，仍需人工对照原文件；分簇误报率受有限样本影响。
+作为 P1 多种子补充（来源为 `05_results/main/metrics_multiseed_summary.csv`，不属于主 `metrics.csv`），十次预先登记的重复中，KDE $h=0.35$ 的 AUC 为 $0.9998\pm0.0002$，稀疏簇 FPR 为 $0.0258\pm0.0127$；LOF $k=20$ 的 AUC 为 $0.9995\pm0.0003$，稀疏簇 FPR 为 $0.0110\pm0.0054$。这些结果已由 C 逐项对照 `metrics_multiseed_summary.csv`（2026-11-27）一致；分簇误报率受有限样本影响。
 
 ## 5 讨论：局限与适用边界
 
@@ -199,6 +203,6 @@ KDE 在高维下受到维数灾难影响，单一全局带宽难以适应强烈�
 - 多种子：`05_results/main/metrics_multiseed_summary.csv`
 - E0 峰结构：`05_results/main/e0_demo1d_peaks.csv`
 - 随机种子：`05_results/main/seed_registry.csv`
-- 配置与协议：v1.0 冻结 tag `v1.0-results-frozen` 中的 `04_code/config_ref.json`
+- 配置与协议：仓库当前 `04_code/config_ref.json` 已是 `B-v1.1-near`；主结果须以冻结 tag `v1.0-results-frozen` 内的 v1.0 配置复现（快照：`05_results/main/config_ref.v1.0.snapshot.json`）
 - 运行日志：`05_results/main/run_log.txt`
 - 正确性与审计：`05_results/main/sanity_checks.md`、`audit_results.md`、`reconciliation_vs_B.md`
