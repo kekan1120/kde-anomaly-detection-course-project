@@ -32,8 +32,8 @@
 - [x] 四份成员记录合并为一份（`human_ai_process_record.md` → docx）
 - [x] 每名成员均含：真实提示词、模型输出摘要、人工核验动作、纠错/拒绝理由、最终采用
 - [x] D 的 `member_D.md` 已填真实 DeepSeek 链接与回合
-- [ ] **B 的会话分享链接待填**（`process-logs/member_B.md` 第 7 行仍为〔待填〕）
-- [ ] **C 的会话分享链接待确认**（C 注明 DSH 桌面端无公网分享，使用「完整会话导出 + 仓库链接」替代，需确认课程是否接受）
+- [ ] **B 的会话分享链接待填**（`process-logs/member_B.md` 第 7 行仍为〔待填〕；按 `docs/session-link-policy.md` 补：DSH 导出 或 DeepSeek 分享链接）
+- [x] **C 的会话分享链接已确认**（DSH 导出凭证 `member_C_session_export.md`，decision-log #25；按 `docs/session-link-policy.md` 为等价凭证）
 - [x] 未虚构模型输出、错误、链接或核验结果（各记录均标注真实来源）
 - [x] 小组人机协作范式总结已写入（「先限定、再推导、必核验、后采用」五步）
 
