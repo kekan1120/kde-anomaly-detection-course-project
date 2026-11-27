@@ -183,17 +183,36 @@ def run_multiseed(cfg: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
 def smoke_config(cfg: dict, scale: int = 10) -> dict:
     """把样本量按比例缩小的一份**内存副本**，仅用于「先跑少量样本再跑全量」的冒烟测试。
 
-    注意：它不写回配置、不产出正式结果，因此不违反「网格与样本量在跑实验前锁定」。
-    但阈值超阈数会随 n 变化，所以冒烟只检查流程与形状，不检查阈值是否等于 10。
+    v1.1 起异常类型不止一个，因此 **near.n_test / far.n_test / far.n_draw 必须按同一比例
+    缩放**，否则合计与 `test.n_anomaly` 对不上：旧实现把 `far.n_test` 直接写成 `n_anomaly`，
+    只在「只有 far 一种类型」时成立，一旦 near 启用，`build_anomalies` 的合计断言必炸。
+
+    它不写回配置、不产出正式结果，因此不违反「网格与样本量在跑实验前锁定」。
+    但阈值超阈数会随 n 变化，所以冒烟只检查流程与形状，不检查超阈数 = 10。
     """
     c = copy.deepcopy(cfg)
     for name in ("train", "validation", "test"):
         s = c["data"]["splits"][name]
         s["n_dense"] //= scale
         s["n_sparse"] //= scale
-        if s["n_anomaly"]:
-            s["n_anomaly"] //= scale
-            c["anomaly"]["types"]["far"]["n_test"] = s["n_anomaly"]
+        s["n_anomaly"] //= scale
         s["total"] = s["n_dense"] + s["n_sparse"] + s["n_anomaly"]
-    c["anomaly"]["types"]["far"]["n_test"] = c["data"]["splits"]["test"]["n_anomaly"]
+
+    types = c["anomaly"]["types"]
+    enabled = [k for k in ("far", "near") if types[k]["enabled"]]
+    target = int(c["data"]["splits"]["test"]["n_anomaly"])
+    if enabled:
+        alloc = {k: max(1, int(types[k]["n_test"]) // scale) for k in enabled}
+        # 整除的零头全部记到第一个类型，保证合计恰好等于 target
+        alloc[enabled[0]] += target - sum(alloc.values())
+        if alloc[enabled[0]] < 1:
+            raise ValueError(f"缩比后 {enabled[0]}.n_test={alloc[enabled[0]]} < 1，请减小 scale")
+        if sum(alloc.values()) != target:
+            raise ValueError(f"缩比后异常合计 {sum(alloc.values())} != {target}")
+        for k in enabled:
+            types[k]["n_test"] = int(alloc[k])
+            if "n_draw" in types[k]:
+                types[k]["n_draw"] = max(int(alloc[k]), int(types[k]["n_draw"]) // scale)
+                if types[k]["n_draw"] < types[k]["n_test"]:
+                    raise ValueError(f"缩比后 {k}.n_draw < n_test，请减小 scale")
     return c

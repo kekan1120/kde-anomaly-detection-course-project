@@ -102,6 +102,19 @@ def load_config(path: str | Path | None = None) -> dict[str, Any]:
     _require(n_enabled == t["n_anomaly"],
              f"启用的异常类型合计 {n_enabled} 与 test.n_anomaly={t['n_anomaly']} 不一致")
 
+    # ---- §3.1 抽样口径（B-v1.1-near 起）：n_test 不能超过 n_draw。
+    # 先按固定的 n_draw 抽 (theta, r) 再取前 n_test 行，故 n_draw 决定随机数消耗量；
+    # 该口径使「同一条流、不同 n_test」的两个版本点级嵌套。校验放在这里（协议层），
+    # dgp.sample_far_ring 里只留一处防御性断言。
+    for key in ("far", "near"):
+        spec = cfg["anomaly"]["types"][key]
+        if not spec["enabled"]:
+            continue
+        n_test = int(spec["n_test"])
+        n_draw = int(spec.get("n_draw", n_test))
+        _require(n_test <= n_draw,
+                 f"{key}: n_test={n_test} 不能大于 n_draw={n_draw}（协议 §3.1）")
+
     # ---- §8 一维示例总数自洽
     demo = cfg["demo_1d"]
     _require(demo["components"]["dense"]["n"] + demo["components"]["sparse"]["n"] == demo["total"],

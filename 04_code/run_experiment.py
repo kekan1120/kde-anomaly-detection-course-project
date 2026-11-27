@@ -73,10 +73,21 @@ def main(argv: list[str] | None = None) -> int:
         cfg = experiment.smoke_config(cfg, scale=10)
 
     log: list[str] = []
+    ci = reporting.config_info(cfg)
+    far_spec = cfg["anomaly"]["types"]["far"]
+    n_far = int(far_spec["n_test"]) if far_spec["enabled"] else 0
+    n_near = int(cfg["anomaly"]["types"]["near"]["n_test"]) if cfg["anomaly"]["types"]["near"]["enabled"] else 0
+    n_draw = int(far_spec.get("n_draw", far_spec["n_test"]))
+    # 首行：机器可 grep 的溯源摘要（协议版本、配置字节 sha256、far 抽样口径、分层异常数）
+    log.append(f"protocol_version={cfg['protocol_version']} | config_sha256={ci['config_sha256']} | "
+               f"far.n_draw={n_draw} | n_anomaly_far={n_far} | n_anomaly_compact_void={n_near}")
     log.append("=" * 78)
     log.append("KDE / LOF 课程项目 —— 正式实验运行日志（C 实现与复现负责人）")
     log.append("=" * 78)
     log.append(f"protocol_version : {cfg['protocol_version']}")
+    log.append(f"config_file      : {ci['config_file']}")
+    log.append(f"config_sha256    : {ci['config_sha256']}")
+    log.append(f"far.n_draw       : {n_draw}（n_test={far_spec['n_test']}）")
     log.append("接触顺序声明     : 参数网格与默认参数在运行本脚本之前已由 B 锁定；本脚本无任何按结果调参的入口")
     log.append(f"运行开始时间     : {reporting.now_stamp()}")
     for k, v in reporting.environment_info().items():

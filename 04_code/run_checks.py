@@ -18,6 +18,8 @@
 
 from __future__ import annotations
 
+import argparse
+import copy
 import json
 import sys
 from pathlib import Path
@@ -41,6 +43,8 @@ from kdelof import (  # noqa: E402
 ROOT = HERE.parent
 RESULTS = ROOT / "05_results" / "main"
 BASELINE = ROOT / "05_results" / "ref_check"
+#: v1.0 正式结果（冻结于 tag v1.0-results-frozen），C17 不变性契约的对照物
+V10_DIR = ROOT / "05_results" / "main"
 RECORDS: list[dict] = []
 
 
@@ -85,18 +89,26 @@ def check_reproducible(cfg: dict, data: dict) -> None:
            {n: v[:32] for n, v in fps.items()})
 
 
-def check_fingerprint_vs_baseline(data: dict) -> None:
-    """与 B 的基准指纹对账（跨实现一致性）。"""
+def check_fingerprint_vs_baseline(cfg: dict, data: dict) -> None:
+    """与 B 的 v1.0 基准指纹对账。
+
+    v1.1 起测试集构成由「250 far」变成「125 far + 125 near」，**test 指纹必然变**
+    （数据不同，sha256 当然不同）。因此本项拆成两半：
+
+    * train / validation：必须与 v1.0 基准**逐位相同**（模型拟合与阈值校准都只依赖它们）；
+    * test：与 v1.0 基准**必须不同**（构成变了），其指纹登记为本版本的新基线。
+    """
     ref_path = BASELINE / "data_fingerprints.json"
     if not ref_path.exists():
-        record("C3", "与 B 基准的数据指纹对账", False,
+        record("C3", "与基准的数据指纹对账", False,
                f"未找到基准文件 {ref_path}；请确认 05_results/ref_check 已随仓库提供", {})
         return
 
     ref = json.loads(ref_path.read_text(encoding="utf-8"))["splits"]
-    rows, ok = [], True
-    worst = 0.0
-    for name in ("train", "validation", "test"):
+    is_v11 = bool(cfg["anomaly"]["types"]["near"]["enabled"])
+    rows, ok, worst = [], True, 0.0
+
+    for name in ("train", "validation"):
         mine = data[name].fingerprint()
         sha_same = mine["sha256_float64"] == ref[name]["sha256_float64"]
         dev = 0.0
@@ -107,8 +119,26 @@ def check_fingerprint_vs_baseline(data: dict) -> None:
         worst = max(worst, dev)
         ok = ok and sha_same and dev <= 1e-12
         rows.append(f"{name}: sha256{'一致' if sha_same else '不一致'}，统计量最大相对偏差={dev:.3e}")
-    record("C3", "与 B 基准的数据指纹对账（sha256 逐位一致 + 统计量相对容差 ≤ 1e-12）", ok,
-           "；".join(rows), {"worst_rel_dev": worst})
+
+    test_fp = data["test"].fingerprint()
+    test_same = test_fp["sha256_float64"] == ref["test"]["sha256_float64"]
+    if is_v11:
+        # 新基线：test 指纹写入本结果目录（run_experiment 已写 data_fingerprints.json），
+        # 这里只判定「与 v1.0 不同」——相同反而说明配置没生效。
+        ok = ok and (not test_same)
+        rows.append(
+            f"test: 由「250 far」变为「125 far + 125 near」，指纹必然变（与 v1.0 "
+            f"sha256 {'相同→异常' if test_same else '不同→符合预期'}）；新基线 "
+            f"{test_fp['sha256_float64'][:32]}"
+        )
+    else:
+        ok = ok and test_same
+        rows.append(f"test: sha256{'一致' if test_same else '不一致'}（v1.0 下应与基准相同）")
+
+    record("C3", "数据指纹：train/validation 与 v1.0 基准逐位一致；test 指纹按构成变更登记新基线", ok,
+           "；".join(rows),
+           {"worst_rel_dev": worst, "test_sha256_v1_1": test_fp["sha256_float64"],
+            "test_sha256_v1_0": ref["test"]["sha256_float64"]})
 
 
 def check_labels(cfg: dict, data: dict) -> None:
@@ -360,25 +390,39 @@ def check_e0(cfg: dict) -> None:
 
 
 def check_smoke_pipeline(cfg: dict) -> None:
-    """缩比配置端到端跑通：形状、NaN、指标取值范围。"""
+    """缩比配置端到端跑通：各异常类型按同一比例缩放、合计仍等于 n_anomaly。
+
+    v1.1 起 far / near 并存，缩比必须对 `near.n_test`、`far.n_test`、`far.n_draw` 一起做，
+    否则合计与 `test.n_anomaly` 对不上（旧 `smoke_config` 的 bug）。
+    """
     small = experiment.smoke_config(cfg, scale=20)
+    t = small["anomaly"]["types"]
+    n_far = int(t["far"]["n_test"]) if t["far"]["enabled"] else 0
+    n_near = int(t["near"]["n_test"]) if t["near"]["enabled"] else 0
+    n_draw = int(t["far"].get("n_draw", t["far"]["n_test"]))
+    test_n = int(small["data"]["splits"]["test"]["n_anomaly"])
+    alloc_ok = (n_far + n_near == test_n) and (n_draw >= n_far)
+
     data = dgp.generate_all(small)
     row_kde = experiment.run_configuration(small, data, "kde", float(small["detectors"]["kde"]["default_bandwidth"]),
                                            "SMOKE")
     row_lof = experiment.run_configuration(small, data, "lof", int(small["detectors"]["lof"]["default_n_neighbors"]),
                                            "SMOKE")
-    ok = True
+    ok = alloc_ok
     for r in (row_kde, row_lof):
         ok = ok and r["n"] == small["data"]["splits"]["test"]["total"]
         ok = ok and 0.0 <= r["roc_auc"] <= 1.0 and 0.0 <= r["average_precision"] <= 1.0
         ok = ok and r["tp"] + r["fp"] + r["tn"] + r["fn"] == r["n"]
         ok = ok and not np.isnan(r["threshold"])
-    record("C14", "缩比配置端到端冒烟：流水线在改动样本量时不静默出错", ok,
+        ok = ok and r["n_anomaly_far"] == n_far and r["n_anomaly_compact_void"] == n_near
+    record("C14", "缩比配置端到端冒烟：near/far/n_draw 同比例缩放且合计 = n_anomaly", ok,
            f"缩小 20 倍后 train={len(data['train'])} validation={len(data['validation'])} "
-           f"test={len(data['test'])}；KDE AUC={row_kde['roc_auc']:.4f} 阈值={row_kde['threshold']:.4f}；"
-           f"LOF AUC={row_lof['roc_auc']:.4f} 阈值={row_lof['threshold']:.4f}"
+           f"test={len(data['test'])}；far.n_test={n_far} + near.n_test={n_near} = {n_far + n_near}"
+           f"（应为 {test_n}），far.n_draw={n_draw}；KDE AUC={row_kde['roc_auc']:.4f} "
+           f"阈值={row_kde['threshold']:.4f}；LOF AUC={row_lof['roc_auc']:.4f} 阈值={row_lof['threshold']:.4f}"
            f"（冒烟不校验超阈数=10，因为 n 已变）",
-           {"kde": {k: row_kde[k] for k in ("roc_auc", "threshold", "average_precision")},
+           {"far_n_test": n_far, "near_n_test": n_near, "far_n_draw": n_draw, "test_n_anomaly": test_n,
+            "kde": {k: row_kde[k] for k in ("roc_auc", "threshold", "average_precision")},
             "lof": {k: row_lof[k] for k in ("roc_auc", "threshold", "average_precision")}})
 
 
@@ -407,6 +451,137 @@ def check_output_contract(cfg: dict) -> None:
 # --------------------------------------------------------------------------------------
 
 
+#: C17 的不变子空间：只依赖 train + validation，与 test 的异常构成无关。
+INVARIANT_COLUMNS = [
+    "threshold",
+    "val_mean_log_likelihood",
+    "fp_dense", "fp_sparse",
+    "fpr_dense", "fpr_sparse",
+    "n_normal_dense", "n_normal_sparse",
+]
+
+
+def v1_0_view(cfg: dict) -> dict:
+    """由已签的 v1.1 配置**反演出 v1.0 视图**，用于点级嵌套比对。
+
+    等价性依据：B 在 `442d9e6` 里对 `config_ref.json` 的实质改动只有三处
+    （`far.n_test` 250→125、新增 `far.n_draw`、`near.enabled/near.n_test`），
+    其余字段逐字节未动。这里把这四处回滚，即得到与 `B-v1.0-locked` 完全等价的
+    DGP（种子、簇参数、网格都不受影响）。
+    """
+    c = copy.deepcopy(cfg)
+    c["protocol_version"] = "B-v1.0-locked"
+    far = c["anomaly"]["types"]["far"]
+    far["n_test"] = 250
+    far.pop("n_draw", None)
+    far.pop("sampling_note", None)
+    near = c["anomaly"]["types"]["near"]
+    near["enabled"] = False
+    near["n_test"] = 0
+    return c
+
+
+def check_invariance(cfg: dict, data: dict, v10_dir: Path) -> None:
+    """C17 不变性契约：v1.1 相对 v1.0，凡只依赖 train/validation 的量必须逐位相等。
+
+    覆盖：10 个阈值、`val_mean_log_likelihood`、`fp_dense`、`fp_sparse`、`fpr_dense`、
+    `fpr_sparse`、`n_normal_dense`、`n_normal_sparse`，以及 train/validation 的数据指纹。
+    判据是「逐项 max|Δ| == 0」，不是容差内 —— 这些量在数学上就不该变。
+    """
+    import pandas as pd
+
+    mine_path = RESULTS / "metrics.csv"
+    base_path = v10_dir / "metrics.csv"
+    if not (mine_path.exists() and base_path.exists()):
+        record("C17", "不变性契约（v1.1 vs v1.0）", False,
+               f"缺少结果文件：mine={mine_path.exists()}，v1.0={base_path.exists()}", {})
+        return
+
+    keys = ["experiment", "detector", "param_value"]
+    a = pd.read_csv(mine_path)
+    b = pd.read_csv(base_path)
+    m = a.merge(b, on=keys, suffixes=("_v11", "_v10"))
+    if len(m) != len(a) or len(m) != len(b):
+        record("C17", "不变性契约（v1.1 vs v1.0）", False,
+               f"行无法一一对齐：v1.1={len(a)} 行，v1.0={len(b)} 行，匹配后={len(m)} 行", {})
+        return
+
+    rows, ok, worst_all = {}, True, 0.0
+    for col in INVARIANT_COLUMNS:
+        x = m[f"{col}_v11"].to_numpy(dtype=np.float64)
+        y = m[f"{col}_v10"].to_numpy(dtype=np.float64)
+        both_nan = np.isnan(x) & np.isnan(y)
+        d = np.where(both_nan, 0.0, np.abs(x - y))
+        nan_mismatch = int(np.sum(np.isnan(x) ^ np.isnan(y)))
+        worst = float(np.nanmax(d)) if d.size else 0.0
+        n_neq = int(np.sum(d > 0))
+        rows[col] = {"max_abs_diff": worst, "n_unequal": n_neq, "n_nan_mismatch": nan_mismatch}
+        worst_all = max(worst_all, worst)
+        ok = ok and worst == 0.0 and n_neq == 0 and nan_mismatch == 0
+
+    fp_m = json.loads((RESULTS / "data_fingerprints.json").read_text(encoding="utf-8"))["splits"]
+    fp_b = json.loads((v10_dir / "data_fingerprints.json").read_text(encoding="utf-8"))["splits"]
+    for name in ("train", "validation"):
+        same = fp_m[name]["sha256_float64"] == fp_b[name]["sha256_float64"]
+        rows[f"{name}.sha256"] = {"max_abs_diff": 0.0 if same else None, "n_unequal": 0 if same else 1}
+        ok = ok and same
+
+    detail = (f"12 行主结果逐列比对，最大 |Δ| = {worst_all:.3e}（判据：恒等于 0）；"
+              + "；".join(f"{c}={'0' if rows[c]['max_abs_diff'] == 0 else rows[c]['max_abs_diff']}"
+                          for c in INVARIANT_COLUMNS)
+              + f"；train/validation 指纹"
+              + ("一致" if rows["train.sha256"]["n_unequal"] == 0 and rows["validation.sha256"]["n_unequal"] == 0
+                 else "不一致"))
+    record("C17", "不变性契约：阈值/val 似然/分簇误报计数与率/正常样本计数/train·validation 指纹逐位不变",
+           ok, detail, rows)
+
+
+def check_point_nesting(cfg: dict, data: dict) -> None:
+    """C18 点级嵌套：v1.1 的 125 个 far 点 == v1.0 那 250 个 far 点的前 125 个。
+
+    再加一层更强的：这些点上的 KDE 分数与 LOF 分数也必须逐位相同 —— 分数只依赖
+    `train` + 该点，而 train 未变、点未变，所以分数在数学上必须相等。若不等，说明
+    `n_draw` 口径没生效（例如仍按 n_test 抽），或分数计算里混入了与 test 有关的状态。
+    """
+    v10 = v1_0_view(cfg)
+    test_v10 = dgp.generate_split(v10, "test")
+    s10 = cfg["data"]["splits"]["test"]
+    n_normal = int(s10["n_dense"]) + int(s10["n_sparse"])
+    n_far_v11 = int(cfg["anomaly"]["types"]["far"]["n_test"])
+
+    far10 = test_v10.X[n_normal:n_normal + 250]
+    far11 = data["test"].X[n_normal:n_normal + n_far_v11]
+    expect = far10[:n_far_v11]
+
+    row_eq = np.all(far11 == expect, axis=1)
+    n_neq_pts = int(np.sum(~row_eq))
+    max_dx = float(np.max(np.abs(far11 - expect))) if far11.size else 0.0
+
+    train_X = data["train"].X
+    score_rows, ok = {}, (n_neq_pts == 0 and max_dx == 0.0)
+    for h in cfg["detectors"]["kde"]["bandwidth_grid"]:
+        a = scoring.kde_log_density(train_X, expect, float(h))
+        b = scoring.kde_log_density(train_X, far11, float(h))
+        d = float(np.max(np.abs(a - b)))
+        nq = int(np.sum(a != b))
+        score_rows[f"kde_h={h:g}"] = {"max_abs_diff": d, "n_unequal": nq}
+        ok = ok and d == 0.0 and nq == 0
+    for k in cfg["detectors"]["lof"]["n_neighbors_grid"]:
+        a = scoring.lof_neg_outlier_factor(train_X, expect, int(k))
+        b = scoring.lof_neg_outlier_factor(train_X, far11, int(k))
+        d = float(np.max(np.abs(a - b)))
+        nq = int(np.sum(a != b))
+        score_rows[f"lof_k={k}"] = {"max_abs_diff": d, "n_unequal": nq}
+        ok = ok and d == 0.0 and nq == 0
+
+    worst_score = max(v["max_abs_diff"] for v in score_rows.values())
+    record("C18", "点级嵌套：v1.1 的 125 个 far 点 == v1.0 前 125 个，且两者分数逐位相同", ok,
+           f"点坐标：不等行数={n_neq_pts}/{n_far_v11}，max|Δ|={max_dx:.3e}；"
+           f"分数：10 个配置（6 带宽 + 4 邻居数）最大 |Δ|={worst_score:.3e}，"
+           f"不等元素总数={sum(v['n_unequal'] for v in score_rows.values())}",
+           {"points": {"n_unequal_rows": n_neq_pts, "max_abs_diff": max_dx}, "scores": score_rows})
+
+
 def render_markdown(cfg: dict, n_fail: int) -> str:
     env = reporting.environment_info()
     L = ["# 正确性核验记录（C 实现与复现负责人）", "",
@@ -431,18 +606,27 @@ def render_markdown(cfg: dict, n_fail: int) -> str:
     return "\n".join(L)
 
 
-def main() -> int:
+def main(argv: list[str] | None = None) -> int:
+    global RESULTS
+    ap = argparse.ArgumentParser(description="C 的正确性核验套件")
+    ap.add_argument("--results", default=None,
+                    help="被测结果目录（默认 05_results/main；v1.1 用 05_results/main_v1_1_near）")
+    args = ap.parse_args(argv)
+    if args.results:
+        RESULTS = Path(args.results).resolve()
+
     _configure_stdout()
     RESULTS.mkdir(parents=True, exist_ok=True)
     cfg = protocol.load_config()
-    print(f"协议版本 {cfg['protocol_version']}")
+    print(f"协议版本 {cfg['protocol_version']}；结果目录 {RESULTS}")
     print("=" * 78)
 
     data = dgp.generate_all(cfg)
+    is_v11 = bool(cfg["anomaly"]["types"]["near"]["enabled"])
 
     check_config(cfg)
     check_reproducible(cfg, data)
-    check_fingerprint_vs_baseline(data)
+    check_fingerprint_vs_baseline(cfg, data)
     check_labels(cfg, data)
     check_no_overlap(data)
     check_kde_math(cfg, data)
@@ -455,6 +639,9 @@ def main() -> int:
     check_e0(cfg)
     check_smoke_pipeline(cfg)
     check_output_contract(cfg)
+    if is_v11:
+        check_invariance(cfg, data, V10_DIR)
+        check_point_nesting(cfg, data)
 
     n_fail = sum(1 for r in RECORDS if r["status"] == "FAIL")
     print("=" * 78)

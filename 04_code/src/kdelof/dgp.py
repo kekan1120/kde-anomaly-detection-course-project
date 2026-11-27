@@ -149,8 +149,12 @@ def sample_far_ring(cfg: dict[str, Any], n_test: int, repeat: int = 0) -> np.nda
 def sample_compact_void(cfg: dict[str, Any], n: int, repeat: int = 0) -> np.ndarray:
     """可选 P1：空区里的紧凑小簇（协议 §3.2）。
 
-    离两个正常簇都远 -> 绝对密度极低（KDE 必判异常）；内部点彼此很近 -> 局部密度高
-    （LOF 会判正常）。它是当前 DGP 下唯一能把「全局密度」与「局部相对密度」拉开的形态。
+    空区中的紧凑小簇：离两个正常簇都很远，但内部点彼此很近。
+
+    注意：本协议强制 LOF 使用 ``novelty=True``（只在训练正常样本上拟合），新点的局部可达密度
+    是相对**训练集**计算的，离训练集很远就一定很低，因此 **KDE 与 LOF 都会判它异常**；
+    它不是「全局密度 vs 局部相对密度」的方法差异判别点（B 已于 2026-11-27 签署的
+    `near.design_note` 中改写为同一结论，设计阶段探针实测判异率均 100%）。
     """
     spec = cfg["anomaly"]["types"]["near"]
     rng = protocol.make_rng(cfg, spec["seed_key"], repeat)

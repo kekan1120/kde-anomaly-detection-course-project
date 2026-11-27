@@ -38,6 +38,22 @@ def environment_info() -> dict:
     }
 
 
+def config_info(cfg: dict) -> dict:
+    """运行日志用的配置溯源信息：文件路径 + 字节级 sha256。
+
+    sha256 现场计算（不写死），这样任何人拿到 run_log 都能确认结果对应哪一份配置字节。
+    """
+    import hashlib
+
+    from . import protocol
+
+    path = protocol.CONFIG_PATH
+    return {
+        "config_file": str(path),
+        "config_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    }
+
+
 def write_seed_registry(cfg: dict, out_dir: Path) -> pd.DataFrame:
     """种子与数据流登记表（机器可读版，对应协议 §8）。"""
     streams = {
@@ -48,7 +64,7 @@ def write_seed_registry(cfg: dict, out_dir: Path) -> pd.DataFrame:
         "test.dense": ("test", "正常·密集簇", "X = mean_dense + 0.5*standard_normal((n,2))"),
         "test.sparse": ("test", "正常·稀疏簇", "X = mean_sparse + 1.0*standard_normal((n,2))"),
         "test.anomaly.far": ("test", "异常·远端圆环", "theta=uniform(0,2pi,n); r=uniform(5,7,n); X=[r*cos,r*sin]"),
-        "test.anomaly.near": ("test", "异常·空区紧凑簇（默认关闭）", "X=[0,5]+0.35*standard_normal((n,2))"),
+        "test.anomaly.near": ("test", "异常·空区紧凑簇", "X=[0,5]+0.35*standard_normal((n,2))"),
         "demo1d.dense": ("demo_1d", "一维示意·密集分量", "x = -1.5 + 0.30*standard_normal(n)"),
         "demo1d.sparse": ("demo_1d", "一维示意·稀疏分量", "x = 1.5 + 0.80*standard_normal(n)"),
     }
@@ -60,20 +76,34 @@ def write_seed_registry(cfg: dict, out_dir: Path) -> pd.DataFrame:
     }
     rows = []
     for stream, (split, role, formula) in streams.items():
+        # n_draw：v1.1 起 far 按「先抽 n_draw 组 (theta,r)，再取前 n_test 行」抽样，
+        # 随机数消耗量由 n_draw 决定；缺省时等于 n_test（即 v1.0 行为）。
+        n_draw, n_draw_note = None, "n/a"
         if split == "demo_1d":
             which = stream.rsplit(".", 1)[-1]
             n = int(cfg["demo_1d"]["components"][which]["n"])
         elif split == "test" and stream.startswith("test.anomaly"):
             key = "far" if stream.endswith("far") else "near"
-            n = int(cfg["anomaly"]["types"][key]["n_test"])
+            spec = cfg["anomaly"]["types"][key]
+            n = int(spec["n_test"])
+            if "n_draw" in spec:
+                n_draw, n_draw_note = int(spec["n_draw"]), "config.anomaly.types.far.n_draw"
+            else:
+                n_draw, n_draw_note = n, "缺省（= n_test）"
+            if key == "near":
+                role = "异常·空区紧凑簇" + ("（启用）" if spec["enabled"] else "（未启用）")
         else:
             which = stream.rsplit(".", 1)[-1]
             n = int(split_n[split][f"n_{which}"])
+        if n_draw is None:
+            n_draw, n_draw_note = n, "n/a（该流不按 n_draw 抽样）"
         rows.append({
             "data_stream": stream,
             "split": split,
             "role": role,
             "n": n,
+            "n_draw": n_draw,
+            "n_draw_note": n_draw_note,
             "seed_core_repeat0": int(cfg["seeds"]["streams"][stream]),
             "generator": "numpy.random.Generator(numpy.random.PCG64(seed))",
             "sampling_formula": formula,

@@ -1,0 +1,209 @@
+{
+  "author_role": "C 实现与复现负责人",
+  "mine": "05_results\\main_v1_1_near",
+  "baseline": "B 的 05_results/ref_check_v1.1（B 机器，Python 3.14.6）",
+  "tolerance": {
+    "float_abs": 1e-09,
+    "data_stats_rel": 1e-12,
+    "sha256": "逐位相等"
+  },
+  "n_items": 39,
+  "n_fail": 0,
+  "items": [
+    {
+      "item": "行数与对齐键",
+      "status": "PASS",
+      "detail": "12 行，键完全对齐"
+    },
+    {
+      "item": "列 n",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 n_normal",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 n_anomaly",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 prevalence",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 n_normal_dense",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 n_normal_sparse",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 n_anomaly_far",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 n_anomaly_compact_void",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 threshold",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 val_exceedance_count",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 val_exceedance_rate",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 tp",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 fp",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 tn",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 fn",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 precision",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 recall",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 f1",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 fpr_overall",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 fpr_dense",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 fpr_sparse",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 fp_dense",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 fp_sparse",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 recall_far",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 recall_compact_void",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 roc_auc",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 average_precision",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 n_inversion_pairs_equiv",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "列 val_mean_log_likelihood",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00，NaN 结构不一致=0（容差 1e-09）"
+    },
+    {
+      "item": "全表",
+      "status": "PASS",
+      "detail": "22 个数值列全部比对；最大列间偏差 0.000e+00（列 None）"
+    },
+    {
+      "item": "param_name",
+      "status": "PASS",
+      "detail": "bandwidth / n_neighbors 标签一致"
+    },
+    {
+      "item": "阈值 kde",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00"
+    },
+    {
+      "item": "阈值 lof",
+      "status": "PASS",
+      "detail": "max|Δ|=0.000e+00"
+    },
+    {
+      "item": "阈值合计",
+      "status": "PASS",
+      "detail": "10 个阈值 max|Δ|=0.000e+00"
+    },
+    {
+      "item": "指纹 train",
+      "status": "PASS",
+      "detail": "sha256 一致；统计量最大相对偏差=0.000e+00"
+    },
+    {
+      "item": "指纹 validation",
+      "status": "PASS",
+      "detail": "sha256 一致；统计量最大相对偏差=0.000e+00"
+    },
+    {
+      "item": "指纹 test",
+      "status": "PASS",
+      "detail": "sha256 一致；统计量最大相对偏差=0.000e+00"
+    },
+    {
+      "item": "E0 峰结构",
+      "status": "PASS",
+      "detail": "3 条带宽的峰数/峰高/谷填充率，最大 |Δ|=0.000e+00"
+    }
+  ]
+}

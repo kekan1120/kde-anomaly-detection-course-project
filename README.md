@@ -61,7 +61,9 @@ python 04_code\ai_draft\run_experiment.py
 
 - 版本 ↔ 配置 ↔ 结果 对照：[05_results/INDEX.md](05_results/INDEX.md)。v1.0 已冻结于 tag `v1.0-results-frozen`（提交 `7f4990c`）
 - v1.0 验收：正确性核验 **15/15**、结果审计 **13/13**、B 脚本交叉审计 **12/12**、与 B 基准对账 **50/50（偏差 0）**
-- 配置变更只能由 B 升协议版本；当前仅有**待签补丁** `04_code/patches/`，仓库内**没有** v1.1 配置，也**没有**任何 v1.1 正式结果
+- 配置变更只能由 B 升协议版本。当前 `config_ref.json` = `B-v1.1-near`（已签），
+  C 的 v1.1 正式结果在 `05_results/main_v1_1_near/`（核验 17/17、与 B 参考结果对账 39/39，max|Δ|=0）；
+  v1.0 仍是预注册主结果，AUC/AP 不得跨版本比较
 
 ## GitHub
 
