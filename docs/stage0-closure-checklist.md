@@ -10,9 +10,9 @@
 |---|---|---|---|
 | 1 | 四名成员姓名和组长已登记 | ✅ | [项目章程](project-charter.md#角色确认) |
 | 2 | 截止日期及提交入口格式已确认 | ✅ | 截止 2026-12-01 23:41；超星「开始作答」；**两份文件** |
-| 3 | 每名成员任务/交付件/交叉审阅对象已确认 | 🟡 待四人签字 | 见第二节 |
-| 4 | 研究问题/假设/数据划分/参数/指标经全组核准 | 🟡 待四人签字 | 见第三节 |
-| 5 | 四份个人 AI 过程记录已建立并记录会话链接 | 🟡 2/4（A、C 已建；B、D 待本人填） | 见第四节 |
+| 3 | 每名成员任务/交付件/交叉审阅对象已确认 | 🟡 3/4（C 的 2.3 待确认） | 见第二节 |
+| 4 | 研究问题/假设/数据划分/参数/指标经全组核准 | ✅ 4/4 | 见第三节 |
+| 5 | 四份个人 AI 过程记录已建立并记录会话链接 | 🟡 2/4（A、D 已填；B、C 待补） | 见第四节 |
 | 6 | GitHub 远程公开仓库已创建并连接 | ✅ | <https://github.com/kekan1120/kde-anomaly-detection-course-project> |
 
 ## 二、条件 3：任务 / 交付件 / 交叉审阅对象确认
@@ -44,17 +44,17 @@
 | A 林辰旭 | ☑ | ☑ | 2026-11-27 |
 | B 连昭悦 | ☑ | ☑ | 2026-11-27 |
 | C 沈伊镄 | ☑ | ☑ | |
-| D 陈永喆 | ☐ | ☐ | |
+| D 陈永喆 | ☑ | ☑ | 2026-11-27 |
 
 ## 三、条件 4：研究问题与协议核准
 
 | 核准项 | 依据文档 | A | B | C | D |
 |---|---|---|---|---|---|
-| Q1–Q3 研究问题无歧义、可操作化 | [research-questions-hypotheses.md](research-questions-hypotheses.md) §1 | ☑ | ☑ | ☑ | ☐ |
-| H1–H4 可观测变量与推翻判据 | 同上 §2 | ☑ | ☑ | ☑ | ☐ |
-| 符号、得分方向、阈值方向 | 同上 §3 + [glossary.md](glossary.md) | ☑ | ☑ | ☑ | ☐ |
-| 数据划分 / 参数网格 / 指标定义 | `04_code/config_ref.json`（**B-v1.1-near**；v1.0 冻结于 tag `v1.0-results-frozen`） | ☑ | ☑ | ☑ | ☐ |
-| H1/H4 合并为「带宽敏感性」主线 | [decision-log.md](decision-log.md) #14 | ☑ | ☑ | ☑ | ☐ |
+| Q1–Q3 研究问题无歧义、可操作化 | [research-questions-hypotheses.md](research-questions-hypotheses.md) §1 | ☑ | ☑ | ☑ | ☑ |
+| H1–H4 可观测变量与推翻判据 | 同上 §2 | ☑ | ☑ | ☑ | ☑ |
+| 符号、得分方向、阈值方向 | 同上 §3 + [glossary.md](glossary.md) | ☑ | ☑ | ☑ | ☑ |
+| 数据划分 / 参数网格 / 指标定义 | `04_code/config_ref.json`（**B-v1.1-near**；v1.0 冻结于 tag `v1.0-results-frozen`） | ☑ | ☑ | ☑ | ☑ |
+| H1/H4 合并为「带宽敏感性」主线 | [decision-log.md](decision-log.md) #14 | ☑ | ☑ | ☑ | ☑ |
 
 > 注：C 已在 `05_results/main/sanity_checks.md` 中对符号方向与阈值口径做 15 项核验（全 PASS），可作 C 确认的证据。
 
@@ -82,7 +82,7 @@ B 已逐项读完 `research-questions-hypotheses.md`、`glossary.md` 与 `04_cod
 | A | [member_A.md](../process-logs/member_A.md) | session-d74f302b-694c-4833-9469-70713f36e171 | 已建，链接已填 |
 | B | [member_B.md](../process-logs/member_B.md) | 待填 | **模板已建，待本人填真实回合** |
 | C | [member_C.md](../process-logs/member_C.md) | 待填 | 已建，待补链接 |
-| D | [member_D.md](../process-logs/member_D.md) | 待填 | **模板已建，待本人填真实回合** |
+| D | [member_D.md](../process-logs/member_D.md) | https://chat.deepseek.com/share/finjt1j2r3rl7znvqf | **链接与真实回合已填** |
 
 > 记录必须是本人账号下同一连续会话的真实交互；不得虚构提示词、模型错误或核验结果。
 
@@ -90,16 +90,15 @@ B 已逐项读完 `research-questions-hypotheses.md`、`glossary.md` 与 `04_cod
 
 全部满足后由 A 在 `PROJECT_STATUS.md` 标记「阶段 0 已关闭」并记录关闭日期：
 
-- [ ] 条件 3：四人确认表全部打勾（当前 1/4）
-- [ ] 条件 4：四人核准表全部打勾（当前仅 A）
-- [ ] 条件 5：四份记录均有可访问的会话分享链接（当前 1/4 已填链接）
+- [ ] 条件 3：四人确认表全部打勾（当前 3/4，C 待确认）
+- [x] 条件 4：四人核准表全部打勾（4/4）
+- [ ] 条件 5：四份记录均有可访问的会话分享链接（当前 2/4 已填链接；D 链接与真实回合已填，B、C 待补）
 
 ## 六、剩余动作分工
 
 | 动作 | 责任人 | 阻塞下游 |
 |---|---|---|
-| 填写本清单 2.3 / 三 的确认与核准 | B、C、D | 阶段 0 关闭 |
+| 填写本清单 2.3 / 三 的确认与核准 | C | 阶段 0 关闭 |
 | 建 `member_B.md` 真实回合 | B | 55 分记录项 |
-| 建 `member_D.md` 真实回合 | D | 55 分记录项 |
-| 补三人会话分享链接 | A、C 已建者补链接；B、D 填 | 提交门 |
+| 补 B、C 会话分享链接及 B 真实回合 | B、C | 55 分记录项与提交门 |
 | 关闭后同步状态 | A | 阶段 1 正式启动 |
