@@ -23,7 +23,7 @@
 | 课程截止日期 | 已确认 | 2026-12-01 23:41（截图推算），剩余约 4.5 天 |
 | 最终文件提交格式 | 已确认 | 两份文件（超星截图口径） |
 | 研究问题与假设可证伪化 | 已核准 | A/B/C/D 全签（`stage0-closure-checklist.md` 三） |
-| 四名成员个人会话记录 | 3/4 有凭证 | D 有 DeepSeek 分享链接；A、C 的 `/export` 凭证**已确认为等价凭证**（decision-log #25）；**B 待填** |
+| 四名成员个人会话记录 | 3/4 有凭证 | 按 [`docs/session-link-policy.md`](docs/session-link-policy.md)：D 分享链接；A、C DSH 导出凭证（已确认等价，decision-log #25）；**B 待填** |
 | 阶段0关闭检查清单 | 已建立 | `docs/stage0-closure-checklist.md`：6 条退出条件 + 四人确认/核准表 |
 | 阶段0章程核准 | 基本完成 | A/B/C/D 已确认与核准；**仅差 B 会话链接**即可关闭 |
 

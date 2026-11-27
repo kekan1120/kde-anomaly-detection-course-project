@@ -40,4 +40,4 @@
 
 | # | 日期 | 决策 | 依据 |
 |---|---|---|---|
-| 25 | 2026-11-27 | **A、C 的 DSH 会话以「导出文件 + 仓库存档」作为等价凭证**（`process-logs/member_A_session_export.md`、`member_C_session_export.md`）；D 用 DeepSeek 分享链接；B 待填 | A 拍板；DSH 桌面端无公网分享服务 |
+| 25 | 2026-11-27 | **A、C 的 DSH 会话以「导出文件 + 仓库存档」作为等价凭证**（`member_A_session_export.md`、`member_C_session_export.md`）；D 用 DeepSeek 分享链接；B 待填。**规范见 `docs/session-link-policy.md`** | A 拍板；DSH 桌面端无公网分享服务 |
