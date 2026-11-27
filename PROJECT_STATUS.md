@@ -52,18 +52,18 @@
 | 交叉审查 B 的参考实现 | 发现并修正 1 处缺陷 | `04_code/ref_check/PATCHES_C.md` |
 | 个人 AI 过程记录 | 已建立 | `process-logs/member_C.md` |
 | 空区紧凑簇 `anomaly.near` 启用 | **已完成** | `04_code/config_ref.json` = B-v1.1-near；C 正式结果 `05_results/main_v1_1_near/`（核验 17/17、审计 13/13、交叉 12/12、对账 39/39）；`recall_compact_void` = 125/125 |
-| 待办：本机会话分享链接 | 待本人填写 | `process-logs/member_C.md` 表头 |
+| C 会话凭证 | 已完成 | DSH `/export` 原文 `process-logs/member_C_session_export.md`（decision-log #25） |
 
 ## 最新进展（2026-11-27）
 
 | 事项 | 状态 | 文件 |
 |---|---|---|
 | 目录统一 | 完成 | A 侧草稿统一到 `04_code/ai_draft/`、`05_results/ai_draft/`，与 C 正式实现物理隔离 |
-| 结果冻结口径 | 完成 | 主结果 **far-only（v1.0，冻结于 `7f4990c`）**；near 待 v1.1 |
+| 结果冻结口径 | 完成 | 主结果 **far-only（v1.0，冻结于 `7f4990c`）**；v1.1 为 post-hoc 分层补充（`05_results/main_v1_1_near/`） |
 | A 侧草稿降级 | 完成 | boundary / compact@(0,0) 经 C 证伪，作「设计迭代记录」（`docs/experiment-protocol.md` §10） |
-| B-v1.1 变更提案 | 已起草，待 B 签署 | `docs/protocol-change-B-v1.1.md`（near.enabled=true、n_test 125/125） |
-| 论文引用口径 | 已建立，待 D 使用 | `docs/paper-citation-guide.md`（禁止引用 near / ai_draft 数字） |
-| 阶段0关闭包 | 已建立，待 B/C/D 签字 | `docs/stage0-closure-checklist.md` |
+| B-v1.1 变更提案 | 已签署生效 | `04_code/config_ref.json` = `B-v1.1-near`；提案见 `docs/protocol-change-B-v1.1.md` |
+| 论文引用口径 | 已完成使用 | `docs/paper-citation-guide.md`；D 论文经 C 32 项复核（0 跨版本混用） |
+| 阶段0关闭包 | **已关闭（2026-11-27）** | `docs/stage0-closure-checklist.md` 六条退出条件全满足 |
 | A 会话链接 | 已填 | `process-logs/member_A.md` |
 | **B 交付入库** | 完成 | `01_protocol_and_data_dictionary.md`（权威协议）、`HANDOFF_README.md`、`START_HERE.md`、`process-logs/member_B.md`（7 回合）；`config_ref.json` 升 **B-v1.1-near** |
 | **B 裁定三问** | 完成 | Q-A 点级嵌套（新增 `far.n_draw=250`，抽样与 n_test 解耦）；Q-B 接受 `B-v1.1-near`（v1.0 仍为预注册主结果）；Q-C 跑 10 种子 |

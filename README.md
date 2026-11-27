@@ -17,7 +17,7 @@
 | `process-logs/` | 四名成员各自的人机协作过程记录 | 各成员 |
 | `04_code/` | 正式实现 + 核验脚本；`04_code/ai_draft/` 为 A 侧 AI 草稿参考；`04_code/ref_check/` 为 B 的参考实现与核验/审计套件 | C（ai_draft 为 A，ref_check 为 B） |
 | `05_results/` | `main/` 正式结果（D 唯一数据源）、`ref_check/` B 基准、`ai_draft/` A 草稿结果 | C / B / A |
-| `06_paper/` | 论文草稿与素材 | D |
+| `06_paper/` | 论文终稿、数字追溯表与投稿材料 | D |
 | `07_submission/` | 课程最终交付文件（两份） | A 打包 |
 | `env/` | 依赖锁定与环境自查 | C |
 

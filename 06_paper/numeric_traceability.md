@@ -9,10 +9,10 @@
 | T-003 | §4.1、图3 | KDE h=0.10 AUC=0.9990、recall=0.9680；h=1.20 AUC=0.9999、recall=1.0000 | `metrics.csv` E1_kde_sensitivity 两行 | 测试集最终评估；阈值来自正常验证集 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
 | T-004 | §4.1、图3 | KDE h=0.80 F1=0.9804，h=1.20 F1=0.9766 | `metrics.csv` E1 rows, f1 | 测试集；不得写成 h=1.20 全指标最优 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
 | T-005 | §4.1、图4 | LOF k=10 AUC=0.9979、recall=0.9520；k=50 AUC=0.9995、recall=0.9960 | `metrics.csv` E2_lof_sensitivity 两行 | novelty=True；测试集 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
-| T-006 | §4.2、图5 | KDE h=0.35：AUC/AP/P/R/F1=0.9995/0.9980/0.9579/1.0000/0.9785 | `metrics.csv` E3_method_comparison kde 行 | 默认操作点；测试集 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
-| T-007 | §4.2、图5 | LOF k=20：AUC/AP/P/R/F1=0.9990/0.9962/0.9643/0.9720/0.9681 | `metrics.csv` E3_method_comparison lof 行 | 默认操作点；测试集 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
+| T-006 | §4.2、图5、图6 | KDE h=0.35：AUC/AP/P/R/F1=0.9995/0.9980/0.9579/1.0000/0.9785 | `metrics.csv` E3_method_comparison kde 行 | 默认操作点；测试集 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
+| T-007 | §4.2、图5、图6 | LOF k=20：AUC/AP/P/R/F1=0.9990/0.9962/0.9643/0.9720/0.9681 | `metrics.csv` E3_method_comparison lof 行 | 默认操作点；测试集 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
 | T-008 | §4.2 | KDE dense/sparse FPR=0.0000/0.0220；LOF=0.0100/0.0080 | `metrics.csv` E3 fpr_dense/fpr_sparse | 正常测试子集；各 500 点 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
-| T-009 | §4.3、图6 | 验证平均对数似然最优 h=0.35，值=-2.8790；测试集事后 AUC 最高 h=1.20，值=0.9999 | `metrics.csv` E1 val_mean_log_likelihood/roc_auc | H4；测试 AUC 仅事后描述，不参与选参 | D已核验；C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV）；待 A 复核 |
+| T-009 | §4.3、图7 | 验证平均对数似然最优 h=0.35，值=-2.8790；测试集事后 AUC 最高 h=1.20，值=0.9999 | `metrics.csv` E1 val_mean_log_likelihood/roc_auc | H4；测试 AUC 仅事后描述，不参与选参 | D已核验；C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV）；待 A 复核 |
 | T-010 | §4.4 | KDE h=0.35 多种子 AUC/AP=0.9998±0.0002/0.9990±0.0007 | `metrics_multiseed_summary.csv` kde param=0.35 | 10 repeats；稳健性补充 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
 | T-011 | §4.4 | LOF k=20 多种子 AUC/AP=0.9995±0.0003/0.9982±0.0011 | `metrics_multiseed_summary.csv` lof param=20 | 10 repeats；稳健性补充 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |
 | T-012 | §4.2 | KDE 稀疏簇误报 11/500，密集簇 0/500 | `metrics.csv` E3 fp_sparse/fp_dense 与 n_normal_* | 正常测试子集 | C 已复核（2026-11-27；32 项脚本 + 逐项对照 CSV） |

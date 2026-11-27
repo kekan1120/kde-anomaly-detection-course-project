@@ -152,7 +152,7 @@
 
 ---
 
-## 待补齐
+## 补齐状态
 
-- [ ] 会话分享链接（本人账号下的完整链接）
+- [x] 会话分享链接：已按 `docs/session-link-policy.md` 补为 DSH 导出凭证 [`member_B_session_export.md`](member_B_session_export.md)（2026-11-27，本人会话 `session-1cb059c6-…`）
 - [x] 在 `docs/stage0-closure-checklist.md` 的 §2.3 与 §三 打勾确认（2026-11-27 完成，并在 §三 后附「B 的核对备注」两条澄清建议）
