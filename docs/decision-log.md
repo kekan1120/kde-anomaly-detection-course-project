@@ -35,3 +35,9 @@
 | 22 | ~~论文撰写~~ ✅ 已完成 | D | `06_paper/course_report.md`，C 复核 32 项 0 错误、0 跨版本混用 |
 | 23 | 阶段 0 签字（**C/D 已签**）；会话链接：C 用 `/export` 凭证待确认、**B 待填** | B、C | 见 `stage0-closure-checklist.md` |
 | 24 | 最终打包 `07_submission/`（两份 docx 已生成） | A | 待 B 链接后重跑 `build_submission.py` 并提交 |
+
+## 已确认决策（续）
+
+| # | 日期 | 决策 | 依据 |
+|---|---|---|---|
+| 25 | 2026-11-27 | **A、C 的 DSH 会话以「导出文件 + 仓库存档」作为等价凭证**（`process-logs/member_A_session_export.md`、`member_C_session_export.md`）；D 用 DeepSeek 分享链接；B 待填 | A 拍板；DSH 桌面端无公网分享服务 |
