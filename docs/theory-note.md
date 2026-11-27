@@ -117,6 +117,6 @@ $$
 | LOF 定义 | Breunig, M. M., Kriegel, H.-P., Ng, R. T., & Sander, J. (2000). LOF: Identifying density-based local outliers. *Proc. ACM SIGMOD 2000*, 93–104. | **10.1145/342009.335388** | **93–104** | https://doi.org/10.1145/342009.335388 | 2026-11-27 | 通过 |
 | `KernelDensity` 实现 | scikit-learn 官方文档 `sklearn.neighbors.KernelDensity` | — | — | https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.KernelDensity.html | 2026-11-27 | 通过 |
 | `LocalOutlierFactor` 实现 | scikit-learn 官方文档 `sklearn.neighbors.LocalOutlierFactor` | — | — | https://scikit-learn.org/stable/modules/generated/sklearn.neighbors.LocalOutlierFactor.html | 2026-11-27 | 通过 |
-| 课程教材 | 组内已用教材（由 A 补充） | 待补充 | 待补充 | — | — | 待补充 |
+| 课程教材（KDE/LOF 背景） | 李航. *机器学习方法*. 北京: 清华大学出版社, 2022. | ISBN **978-7-302-59730-8** | 全书（引用时按章节补页码） | — | — | 通过（A 指定） |
 
 > 说明：Silverman (1986) 为专著、无 DOI，引用用 ISBN；Breunig et al. (2000) 的 DOI 与页码 93–104 已按 DBLP/ACM 记录核对。参考文献格式按 GB/T 7714 或课程要求统一。
